@@ -1,0 +1,43 @@
+{
+	"name": "orca-farming",
+	"version": "0.0.1",
+	"main": "index.js",
+	"description": "Orca whirlpools farming MVP",
+	"author": "dmc0125",
+	"type": "module",
+	"scripts": {
+		"build": "tsc",
+		"build:w": "tsc -w",
+		"dev": "nodemon dist/index.js",
+		"start": "node dist/index.js",
+		"format": "prettier . --write",
+		"pm2:prod": "rm -rf dist && npm run build && pm2 start pm2.config.cjs"
+	},
+	"devDependencies": {
+		"@types/bn.js": "^5.1.1",
+		"@types/node": "^18.7.18",
+		"@typescript-eslint/eslint-plugin": "^5.35.1",
+		"@typescript-eslint/parser": "^5.35.1",
+		"eslint": "^8.22.0",
+		"eslint-config-prettier": "^8.5.0",
+		"nodemon": "^2.0.20",
+		"prettier": "^2.7.1",
+		"typescript": "^4.9.3"
+	},
+	"license": "MIT",
+	"dependencies": {
+		"@orca-so/common-sdk": "^0.1.4",
+		"@orca-so/whirlpools-sdk": "^0.6.0",
+		"@project-serum/anchor": "^0.25.0",
+		"@solana/buffer-layout": "^4.0.0",
+		"@solana/buffer-layout-utils": "^0.2.0",
+		"@solana/spl-token": "^0.3.6",
+		"@solana/web3.js": "^1.67.0",
+		"bn.js": "^5.2.1",
+		"decimal.js": "^10.4.2",
+		"dotenv": "^16.0.3",
+		"lowdb": "^5.0.5",
+		"node-fetch": "^3.3.0",
+		"zod": "^3.19.1"
+	}
+}
