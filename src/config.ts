@@ -10,6 +10,7 @@ import { dirname } from 'path'
 import { fileURLToPath } from 'url'
 
 const __dirname = dirname(fileURLToPath(import.meta.url))
+export const rootDir = __dirname.split('dist')[0]
 
 const loadEnv = () => {
 	const envConfigSchema = z.object({
@@ -34,7 +35,7 @@ const loadConfig = async () => {
 		lowerBoundaryPct: z.number().min(0),
 		usdcPositionSize: z.number().gt(0),
 	})
-	const configFile = await fs.readFile(path.join(__dirname, './../config.json'), {
+	const configFile = await fs.readFile(path.join(rootDir, './config.json'), {
 		encoding: 'utf-8',
 	})
 	const configRes = configSchema.safeParse(JSON.parse(configFile))
@@ -61,3 +62,6 @@ export const {
 	lowerBoundaryPct: LOWER_BOUNDARY_PCT,
 	usdcPositionSize: USDC_POSITION_SIZE,
 } = config
+
+const altFile = await fs.readFile(path.join(rootDir, './alt.json'), { encoding: 'utf-8' })
+export const ALT_ADDRESS = new PublicKey(JSON.parse(altFile).address as string)

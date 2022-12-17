@@ -8,8 +8,7 @@
 	"scripts": {
 		"build": "tsc",
 		"build:w": "tsc -w",
-		"dev": "nodemon dist/index.js",
-		"start": "node dist/index.js",
+		"start": "node dist/src/index.js",
 		"format": "prettier . --write",
 		"pm2:prod": "rm -rf dist && npm run build && pm2 start pm2.config.cjs"
 	},
@@ -33,6 +32,7 @@
 		"@solana/buffer-layout-utils": "^0.2.0",
 		"@solana/spl-token": "^0.3.6",
 		"@solana/web3.js": "^1.67.0",
+		"@solendprotocol/solend-sdk": "^0.6.9",
 		"bn.js": "^5.2.1",
 		"decimal.js": "^10.4.2",
 		"dotenv": "^16.0.3",

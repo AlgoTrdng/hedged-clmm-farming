@@ -8,8 +8,10 @@
 		"skipLibCheck": true,
 		"types": ["node"],
 		"moduleResolution": "node",
+		"resolveJsonModule": true,
 
 		"outDir": "./dist",
-		"rootDir": "./src"
-	}
+		"rootDir": "."
+	},
+	"include": ["alt/**/*", "src/**/*"]
 }
