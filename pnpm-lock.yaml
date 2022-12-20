@@ -22,6 +22,7 @@ specifiers:
   node-fetch: ^3.3.0
   nodemon: ^2.0.20
   prettier: ^2.7.1
+  solana-tx-utils: ^0.0.5
   typescript: ^4.9.3
   zod: ^3.19.1
 
@@ -39,6 +40,7 @@ dependencies:
   dotenv: 16.0.3
   lowdb: 5.0.5
   node-fetch: 3.3.0
+  solana-tx-utils: 0.0.5
   zod: 3.19.1
 
 devDependencies:
@@ -423,6 +425,31 @@ packages:
 
   /@solana/web3.js/1.67.0:
     resolution: {integrity: sha512-t6tfRbYyuoyuik4D4B8eK6hPm//+5l7k+00YppFTGoxcix8b2bpE7iANLmvw+u5iZNMwG3VFV20xRdrqz8zhvQ==}
+    engines: {node: '>=12.20.0'}
+    dependencies:
+      '@babel/runtime': 7.20.6
+      '@noble/ed25519': 1.7.1
+      '@noble/hashes': 1.1.3
+      '@noble/secp256k1': 1.7.0
+      '@solana/buffer-layout': 4.0.0
+      bigint-buffer: 1.1.5
+      bn.js: 5.2.1
+      borsh: 0.7.0
+      bs58: 4.0.1
+      buffer: 6.0.1
+      fast-stable-stringify: 1.0.0
+      jayson: 3.7.0
+      node-fetch: 2.6.7
+      rpc-websockets: 7.5.0
+      superstruct: 0.14.2
+    transitivePeerDependencies:
+      - bufferutil
+      - encoding
+      - utf-8-validate
+    dev: false
+
+  /@solana/web3.js/1.70.1:
+    resolution: {integrity: sha512-AnaqCF1cJ3w7d0yhvLGAKAcRI+n5o+ursQihhoTe4cUh8/9d4gbT73SoHYElS7e67OtAgLmSfbcC5hcOAgdvnQ==}
     engines: {node: '>=12.20.0'}
     dependencies:
       '@babel/runtime': 7.20.6
@@ -1792,6 +1819,17 @@ packages:
     dependencies:
       dot-case: 3.0.4
       tslib: 2.4.1
+    dev: false
+
+  /solana-tx-utils/0.0.5:
+    resolution: {integrity: sha512-wEybViOcead5lwj3FH/0yvVyGH0gLPH+70AENMX1W8i1mGWMywuxnvek8zIkz1I9BGJnLWuxC2ANt/W4/7r29w==}
+    dependencies:
+      '@solana/web3.js': 1.70.1
+      node-fetch: 3.3.0
+    transitivePeerDependencies:
+      - bufferutil
+      - encoding
+      - utf-8-validate
     dev: false
 
   /steno/3.0.0:

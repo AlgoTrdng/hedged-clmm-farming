@@ -4,7 +4,7 @@ import { Adapter, Low } from 'lowdb'
 // @ts-ignore
 import { TextFile } from 'lowdb/node'
 
-import { DB_PATH } from './config.js'
+import { DB_PATH } from '../config.js'
 
 type JSONState = {
 	position: {

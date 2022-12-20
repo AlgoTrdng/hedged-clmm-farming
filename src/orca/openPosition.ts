@@ -376,16 +376,16 @@ export const openPosition = async ({
 	// Wrap SOL
 	const wrapSolIxs: TransactionInstruction[] = []
 	const cleanupIxs: TransactionInstruction[] = []
-	const wrappedSolTokenIndex = [tokenA, tokenB].findIndex(({ mint }) => mint.equals(SOL_MINT))
-	if (wrappedSolTokenIndex > -1) {
-		const amount =
-			wrappedSolTokenIndex === 0
-				? inputLiqData.liqInput.tokenMaxA.toNumber()
-				: inputLiqData.liqInput.tokenMaxB.toNumber()
-		const { cleanup, main } = buildWrapSolInstructions(amount)
-		wrapSolIxs.push(...main)
-		cleanupIxs.push(cleanup)
-	}
+	// const wrappedSolTokenIndex = [tokenA, tokenB].findIndex(({ mint }) => mint.equals(SOL_MINT))
+	// if (wrappedSolTokenIndex > -1) {
+	// 	const amount =
+	// 		wrappedSolTokenIndex === 0
+	// 			? inputLiqData.liqInput.tokenMaxA.toNumber()
+	// 			: inputLiqData.liqInput.tokenMaxB.toNumber()
+	// 	const { cleanup, main } = buildWrapSolInstructions(amount)
+	// 	wrapSolIxs.push(...main)
+	// 	cleanupIxs.push(cleanup)
+	// }
 
 	const depositLiquidityIxs = await buildDepositLiquidityIx({
 		liquidityInput: inputLiqData.liqInput,

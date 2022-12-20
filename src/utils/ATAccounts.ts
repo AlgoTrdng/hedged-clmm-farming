@@ -53,13 +53,14 @@ export const buildCreateAndCloseATAccountsInstructions = async (tokensData: Toke
 export const buildWrapSolInstructions = (amountRaw: number) => {
 	const wrappedSolATAddress = getAssociatedTokenAddressSync(SOL_MINT, wallet.publicKey)
 
-	const main = [
+	const wrapIx = [
 		createAssociatedTokenAccountInstruction(
 			wallet.publicKey,
 			wrappedSolATAddress,
 			wallet.publicKey,
 			SOL_MINT,
 		),
+		// TODO: Transfer amount + amount for account rent
 		SystemProgram.transfer({
 			fromPubkey: ctx.wallet.publicKey,
 			toPubkey: wrappedSolATAddress,
@@ -67,14 +68,14 @@ export const buildWrapSolInstructions = (amountRaw: number) => {
 		}),
 		createSyncNativeInstruction(wrappedSolATAddress),
 	]
-	const cleanup = createCloseAccountInstruction(
+	const unwrapIx = createCloseAccountInstruction(
 		wrappedSolATAddress,
 		wallet.publicKey,
 		wallet.publicKey,
 	)
 
 	return {
-		main,
-		cleanup,
+		wrapIx,
+		unwrapIx,
 	}
 }
