@@ -31,7 +31,12 @@ export const buildBorrowSolFromSolendIx = (amountRaw: number | BN) => {
 	})
 
 	instructions.push(
-		refreshObligationInstruction(OBLIGATION_ADDRESS, [tokenBReserve.address], [], SOLEND_PRODUCTION_PROGRAM_ID),
+		refreshObligationInstruction(
+			OBLIGATION_ADDRESS,
+			[tokenBReserve.address],
+			[],
+			SOLEND_PRODUCTION_PROGRAM_ID,
+		),
 		borrowObligationLiquidityInstruction(
 			amountRaw,
 			tokenAReserve.liquidityAddress,
@@ -46,5 +51,5 @@ export const buildBorrowSolFromSolendIx = (amountRaw: number | BN) => {
 		),
 	)
 
-  return instructions
+	return instructions
 }

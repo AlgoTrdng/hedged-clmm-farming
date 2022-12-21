@@ -1,7 +1,7 @@
 import { TickUtil, PriceMath } from '@orca-so/whirlpools-sdk'
 import Decimal from 'decimal.js'
 
-import { tokenA, tokenB } from '../global.js'
+import { tokenA, tokenB } from '../../global.js'
 
 type GetBoundariesTicksParams = {
 	upperBoundary: number

@@ -38,7 +38,7 @@
 		"dotenv": "^16.0.3",
 		"lowdb": "^5.0.5",
 		"node-fetch": "^3.3.0",
-		"solana-tx-utils": "^0.0.5",
+		"solana-tx-utils": "^0.0.7",
 		"zod": "^3.19.1"
 	}
 }

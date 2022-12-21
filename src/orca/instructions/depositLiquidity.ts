@@ -1,14 +1,9 @@
-import {
-	WhirlpoolData,
-	IncreaseLiquidityInput,
-	PDAUtil,
-	ORCA_WHIRLPOOL_PROGRAM_ID,
-	WhirlpoolIx,
-} from '@orca-so/whirlpools-sdk'
+import { WhirlpoolData, IncreaseLiquidityInput, WhirlpoolIx } from '@orca-so/whirlpools-sdk'
 import { PublicKey, TransactionInstruction } from '@solana/web3.js'
 
 import { WHIRLPOOL_ADDRESS } from '../../config.js'
 import { tokenA, tokenB, wallet, ctx } from '../../global.js'
+import { getTickArrays } from '../helpers/getTickArrays.js'
 
 type BuildDepositLiquidityIxParams = {
 	whirlpoolData: WhirlpoolData
@@ -29,18 +24,11 @@ export const buildDepositLiquidityIx = ({
 }: BuildDepositLiquidityIxParams) => {
 	const instructions: TransactionInstruction[] = []
 
-	const tickArrayLower = PDAUtil.getTickArrayFromTickIndex(
+	const { tickLowerArrayAddress, tickUpperArrayAddress } = getTickArrays({
 		tickLowerIndex,
-		whirlpoolData.tickSpacing,
-		WHIRLPOOL_ADDRESS,
-		ORCA_WHIRLPOOL_PROGRAM_ID,
-	)
-	const tickArrayUpper = PDAUtil.getTickArrayFromTickIndex(
 		tickUpperIndex,
-		whirlpoolData.tickSpacing,
-		WHIRLPOOL_ADDRESS,
-		ORCA_WHIRLPOOL_PROGRAM_ID,
-	)
+		tickSpacing: whirlpoolData.tickSpacing,
+	})
 
 	const { instructions: depositLiquidityIxs } = WhirlpoolIx.increaseLiquidityIx(ctx.program, {
 		liquidityAmount: liquidityInput.liquidityAmount,
@@ -54,8 +42,8 @@ export const buildDepositLiquidityIx = ({
 		tokenOwnerAccountB: tokenB.ATAddress,
 		tokenVaultA: whirlpoolData.tokenVaultA,
 		tokenVaultB: whirlpoolData.tokenVaultB,
-		tickArrayLower: tickArrayLower.publicKey,
-		tickArrayUpper: tickArrayUpper.publicKey,
+		tickArrayLower: tickLowerArrayAddress,
+		tickArrayUpper: tickUpperArrayAddress,
 	})
 	instructions.push(...depositLiquidityIxs)
 

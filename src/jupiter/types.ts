@@ -48,6 +48,5 @@ export type ExecuteJupiterSwapParams = {
 	outputMint: PublicKey
 	amountRaw: number | BN
 	swapMode: SwapMode
-  unwrapSol?: boolean
+	unwrapSol?: boolean
 }
-

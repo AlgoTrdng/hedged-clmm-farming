@@ -21,7 +21,7 @@ const _fetchEncodedTx = async ({
 	swapMode,
 	unwrapSol,
 }: ExecuteJupiterSwapParams): Promise<VersionedTransaction> => {
-	console.log({ unwrapSol})
+	console.log({ unwrapSol })
 	const urlParams = new URLSearchParams({
 		inputMint: inputMint.toString(),
 		outputMint: outputMint.toString(),
