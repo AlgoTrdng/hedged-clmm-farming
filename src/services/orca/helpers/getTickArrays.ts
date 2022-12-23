@@ -1,6 +1,6 @@
 import { ORCA_WHIRLPOOL_PROGRAM_ID, PDAUtil } from '@orca-so/whirlpools-sdk'
 
-import { WHIRLPOOL_ADDRESS } from '../../config.js'
+import { WHIRLPOOL_ADDRESS } from '../../../config.js'
 
 type GetTickArraysParams = {
 	tickLowerIndex: number

@@ -1,7 +1,7 @@
 import { setTimeout } from 'node:timers/promises'
 import { sendTransaction } from 'solana-tx-utils'
 
-import { connection } from '../global.js'
+import { connection } from '../../global.js'
 import { fetchAndSignJupiterTransaction } from './transaction.js'
 import { ExecuteJupiterSwapParams } from './types.js'
 

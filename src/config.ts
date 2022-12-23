@@ -62,6 +62,3 @@ export const {
 	lowerBoundaryPct: LOWER_BOUNDARY_PCT,
 	usdcPositionSize: USDC_POSITION_SIZE,
 } = config
-
-const altFile = await fs.readFile(path.join(rootDir, './alt.json'), { encoding: 'utf-8' })
-export const ALT_ADDRESS = new PublicKey(JSON.parse(altFile).address as string)

@@ -7,8 +7,8 @@ import {
 import { BuiltTransactionData } from 'solana-tx-utils'
 import fetch from 'node-fetch'
 
-import { wallet, connection } from '../global.js'
-import { retryOnThrow } from '../utils/retryOnThrow.js'
+import { wallet, connection } from '../../global.js'
+import { retryOnThrow } from '../../utils/retryOnThrow.js'
 import { ExecuteJupiterSwapParams, JupiterQuoteResponse, JupiterSwapResponse } from './types.js'
 
 const JUPITER_QUOTE_API = 'https://quote-api.jup.ag/v4/quote?slippageBps=10'
@@ -21,7 +21,6 @@ const _fetchEncodedTx = async ({
 	swapMode,
 	unwrapSol,
 }: ExecuteJupiterSwapParams): Promise<VersionedTransaction> => {
-	console.log({ unwrapSol })
 	const urlParams = new URLSearchParams({
 		inputMint: inputMint.toString(),
 		outputMint: outputMint.toString(),

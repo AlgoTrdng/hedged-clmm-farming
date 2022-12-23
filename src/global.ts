@@ -8,7 +8,8 @@ import { getAssociatedTokenAddressSync } from '@solana/spl-token'
 import { Connection, Keypair } from '@solana/web3.js'
 
 import { LOWER_BOUNDARY_PCT, RPC_URL, UPPER_BOUNDARY_PCT, WALLET_PRIVATE_KEY } from './config.js'
-import { getPoolInfo } from './orca/pool.js'
+import { SOL_MINT, USDC_MINT } from './constants.js'
+import { TokenInfo } from './types.js'
 
 export const connection = new Connection(RPC_URL, 'confirmed')
 
@@ -18,17 +19,15 @@ export const wallet = Keypair.fromSecretKey(WALLET_PRIVATE_KEY)
 export const provider = AnchorProvider.env()
 export const ctx = WhirlpoolContext.withProvider(provider, ORCA_WHIRLPOOL_PROGRAM_ID)
 
-const whirlpoolInfo = await getPoolInfo()
-export const { tokenACoingeckoId } = whirlpoolInfo
-export const tokenA = {
-	mint: whirlpoolInfo.tokenAMint,
-	ATAddress: getAssociatedTokenAddressSync(whirlpoolInfo.tokenAMint, wallet.publicKey),
-	decimals: whirlpoolInfo.tokenADecimals,
+export const tokenA: TokenInfo = {
+	mint: SOL_MINT,
+	decimals: 9,
+	ATAddress: getAssociatedTokenAddressSync(SOL_MINT, wallet.publicKey),
 }
-export const tokenB = {
-	mint: whirlpoolInfo.tokenBMint,
-	ATAddress: getAssociatedTokenAddressSync(whirlpoolInfo.tokenBMint, wallet.publicKey),
-	decimals: whirlpoolInfo.tokenBDecimals,
+export const tokenB: TokenInfo = {
+	mint: USDC_MINT,
+	decimals: 6,
+	ATAddress: getAssociatedTokenAddressSync(USDC_MINT, wallet.publicKey),
 }
 
 export const upperBoundaryBps = UPPER_BOUNDARY_PCT / 100

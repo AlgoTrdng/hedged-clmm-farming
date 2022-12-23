@@ -1,4 +1,4 @@
-import { ALT_ADDRESS } from '../config.js'
+import { ALT_ADDRESS } from '../constants.js'
 import { connection } from '../global.js'
 import { retryOnThrow } from './retryOnThrow.js'
 

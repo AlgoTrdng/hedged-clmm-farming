@@ -7,8 +7,8 @@ import {
 } from '@orca-so/whirlpools-sdk'
 import { PublicKey } from '@solana/web3.js'
 
-import { SLIPPAGE_TOLERANCE } from '../../constants.js'
-import { ctx } from '../../global.js'
+import { SLIPPAGE_TOLERANCE } from '../../../constants.js'
+import { ctx } from '../../../global.js'
 
 type BuildDecreaseLiquidityIxParams = {
 	whirlpoolData: WhirlpoolData

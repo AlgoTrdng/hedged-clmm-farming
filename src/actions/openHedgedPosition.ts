@@ -7,17 +7,18 @@ import { BN } from 'bn.js'
 
 import { SLIPPAGE_TOLERANCE } from '../constants.js'
 import { connection, tokenA, tokenB, wallet } from '../global.js'
-import { buildInitTickArrayIx } from '../orca/instructions/initTickArray.js'
-import { getBoundariesTickIndexes } from '../orca/helpers/getBoundariesTickIndex.js'
-import { getWhirlpoolData } from '../orca/pool.js'
-import { buildCreatePositionIx } from '../orca/instructions/createPosition.js'
-import { buildDepositLiquidityIx } from '../orca/instructions/depositLiquidity.js'
+import { buildInitTickArrayIx } from '../services/orca/instructions/initTickArray.js'
+import { getBoundariesTickIndexes } from '../services/orca/helpers/getBoundariesTickIndex.js'
+import { getWhirlpoolData } from '../services/orca/getWhirlpoolData.js'
+import { buildCreatePositionIx } from '../services/orca/instructions/createPosition.js'
+import { buildDepositLiquidityIx } from '../services/orca/instructions/depositLiquidity.js'
 import { buildDepositUsdcToSolendIx } from '../solend/instructions/depositUsdc.js'
 import { buildBorrowSolFromSolendIx } from '../solend/instructions/borrowSol.js'
-import { fetchJupiterInstructions } from '../jupiter/transaction.js'
-import { executeJupiterSwap } from '../jupiter/swap.js'
+import { fetchJupiterInstructions } from '../services/jupiter/transaction.js'
+import { executeJupiterSwap } from '../services/jupiter/swap.js'
 import { createCloseAccountInstruction } from '@solana/spl-token'
 import { loadALTAccount } from '../utils/loadALTAccount.js'
+import { SavedWhirlpoolPosition } from '../types.js'
 
 type OpenHedgedPositionParams = {
 	usdcAmountRaw: number
@@ -29,7 +30,7 @@ export const openHedgedPosition = async ({
 	usdcAmountRaw,
 	upperBoundaryPrice,
 	lowerBoundaryPrice,
-}: OpenHedgedPositionParams): Promise<void> => {
+}: OpenHedgedPositionParams): Promise<SavedWhirlpoolPosition> => {
 	const orcaAmount = Math.floor(usdcAmountRaw * 0.55)
 	const solendAmount = usdcAmountRaw - orcaAmount
 
@@ -138,4 +139,6 @@ export const openHedgedPosition = async ({
 		swapMode: 'ExactIn',
 		amountRaw: liquidityInput.tokenEstA,
 	})
+
+	return position
 }

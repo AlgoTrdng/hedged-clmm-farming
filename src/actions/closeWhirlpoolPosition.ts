@@ -4,12 +4,12 @@ import { buildAndSignTxFromInstructions, sendTransaction } from 'solana-tx-utils
 import { setTimeout } from 'node:timers/promises'
 
 import { connection, ctx, fetcher, tokenA, tokenB, wallet } from '../global.js'
-import { getTickArrays } from '../orca/helpers/getTickArrays.js'
-import { buildCloseWhirlpoolPositionIx } from '../orca/instructions/closePosition.js'
-import { buildCollectRewardsIxs } from '../orca/instructions/collectRewards.js'
-import { buildDecreaseLiquidityIx } from '../orca/instructions/decreaseLiquidity.js'
-import { getWhirlpoolData } from '../orca/pool.js'
-import { PositionMetadata } from '../orca/types.js'
+import { getTickArrays } from '../services/orca/helpers/getTickArrays.js'
+import { buildCloseWhirlpoolPositionIx } from '../services/orca/instructions/closePosition.js'
+import { buildCollectRewardsIxs } from '../services/orca/instructions/collectRewards.js'
+import { buildDecreaseLiquidityIx } from '../services/orca/instructions/decreaseLiquidity.js'
+import { getWhirlpoolData } from '../services/orca/getWhirlpoolData.js'
+import { PositionMetadata } from '../services/orca/types.js'
 import { loadALTAccount } from '../utils/loadALTAccount.js'
 import { retryOnThrow } from '../utils/retryOnThrow.js'
 

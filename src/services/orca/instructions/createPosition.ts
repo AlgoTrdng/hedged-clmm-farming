@@ -2,8 +2,8 @@ import { PDAUtil, ORCA_WHIRLPOOL_PROGRAM_ID, WhirlpoolIx } from '@orca-so/whirlp
 import { getAssociatedTokenAddressSync } from '@solana/spl-token'
 import { Keypair } from '@solana/web3.js'
 
-import { WHIRLPOOL_ADDRESS } from '../../config.js'
-import { wallet, ctx } from '../../global.js'
+import { WHIRLPOOL_ADDRESS } from '../../../config.js'
+import { wallet, ctx } from '../../../global.js'
 
 type BuildCreatePositionIxParams = {
 	tickLowerIndex: number

@@ -9,9 +9,9 @@ import {
 import { getAssociatedTokenAddressSync } from '@solana/spl-token'
 import { PublicKey, TransactionInstruction } from '@solana/web3.js'
 
-import { wallet, ctx, connection, fetcher } from '../../global.js'
-import { buildCreateAndCloseATAccountsInstructions, TokenData } from '../../utils/ATAccounts.js'
-import { retryOnThrow } from '../../utils/retryOnThrow.js'
+import { wallet, ctx, connection, fetcher } from '../../../global.js'
+import { buildCreateAndCloseATAccountsInstructions, TokenData } from '../../../utils/ATAccounts.js'
+import { retryOnThrow } from '../../../utils/retryOnThrow.js'
 import { PositionMetadata } from '../types.js'
 
 type GetTickDataParams = {

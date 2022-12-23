@@ -1,6 +1,6 @@
 import { WhirlpoolIx } from '@orca-so/whirlpools-sdk'
 
-import { ctx, wallet } from '../../global.js'
+import { ctx, wallet } from '../../../global.js'
 import { PositionMetadata } from '../types.js'
 
 export const buildCloseWhirlpoolPositionIx = (positionMetadata: PositionMetadata) => {

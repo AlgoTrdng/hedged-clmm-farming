@@ -6,9 +6,9 @@ import {
 	WhirlpoolData,
 } from '@orca-so/whirlpools-sdk'
 
-import { WHIRLPOOL_ADDRESS } from '../../config.js'
-import { fetcher, ctx, wallet } from '../../global.js'
-import { retryOnThrow } from '../../utils/retryOnThrow.js'
+import { WHIRLPOOL_ADDRESS } from '../../../config.js'
+import { fetcher, ctx, wallet } from '../../../global.js'
+import { retryOnThrow } from '../../../utils/retryOnThrow.js'
 
 export const buildInitTickArrayIx = async (whirlpoolData: WhirlpoolData) => {
 	const startTick = TickUtil.getStartTickIndex(
