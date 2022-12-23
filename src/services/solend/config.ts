@@ -2,8 +2,8 @@ import fetch from 'node-fetch'
 import { ConfigType, SOLEND_PRODUCTION_PROGRAM_ID } from '@solendprotocol/solend-sdk'
 import { PublicKey } from '@solana/web3.js'
 
-import { tokenA, tokenB, wallet } from '../global.js'
-import { retryOnThrow } from '../utils/retryOnThrow.js'
+import { tokenA, tokenB, wallet } from '../../global.js'
+import { retryOnThrow } from '../../utils/retryOnThrow.js'
 import { getAssociatedTokenAddressSync } from '@solana/spl-token'
 
 const SOLEND_API_URL = 'https://api.solend.fi/v1/markets/configs?scope=all&deployment=production'

@@ -7,7 +7,7 @@ import {
 } from '@solendprotocol/solend-sdk'
 import BN from 'bn.js'
 
-import { tokenA, wallet } from '../../global.js'
+import { tokenA, wallet } from '../../../global.js'
 import {
 	OBLIGATION_ADDRESS,
 	SOLEND_POOL_ADDRESS,

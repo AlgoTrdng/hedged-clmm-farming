@@ -8,8 +8,8 @@ import {
 } from '@solendprotocol/solend-sdk'
 import BN from 'bn.js'
 
-import { connection, tokenB, wallet } from '../../global.js'
-import { retryOnThrow } from '../../utils/retryOnThrow.js'
+import { connection, tokenB, wallet } from '../../../global.js'
+import { retryOnThrow } from '../../../utils/retryOnThrow.js'
 import {
 	OBLIGATION_ADDRESS,
 	OBLIGATION_ADDRESS_SEED,
