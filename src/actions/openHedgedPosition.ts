@@ -12,13 +12,12 @@ import { getBoundariesTickIndexes } from '../services/orca/helpers/getBoundaries
 import { getWhirlpoolData } from '../services/orca/getWhirlpoolData.js'
 import { buildCreatePositionIx } from '../services/orca/instructions/createPosition.js'
 import { buildDepositLiquidityIx } from '../services/orca/instructions/depositLiquidity.js'
-import { buildDepositUsdcToSolendIx } from '../services/solend/instructions/depositUsdc.js'
-import { buildBorrowSolFromSolendIx } from '../services/solend/instructions/borrowSol.js'
 import { fetchJupiterInstructions } from '../services/jupiter/transaction.js'
 import { executeJupiterSwap } from '../services/jupiter/swap.js'
-import { createCloseAccountInstruction } from '@solana/spl-token'
 import { loadALTAccount } from '../utils/loadALTAccount.js'
 import { SavedWhirlpoolPosition } from '../types.js'
+import { buildDriftDepositIx } from '../services/drift/instructions/deposit.js'
+import { buildDriftWithdrawIx } from '../services/drift/instructions/withdraw.js'
 
 type OpenHedgedPositionParams = {
 	usdcAmountRaw: number
@@ -78,23 +77,24 @@ export const openHedgedPosition = async ({
 		liquidityInput,
 	})
 
-	// Deposit to SOLEND
-	const depositUsdcToSolendIx = await buildDepositUsdcToSolendIx(solendAmount)
-	const borrowSolFromSolendIx = buildBorrowSolFromSolendIx(liquidityInput.tokenEstA)
-
-	const closeWrappedSolIx = createCloseAccountInstruction(
-		tokenA.ATAddress,
-		wallet.publicKey,
-		wallet.publicKey,
-	)
+	// Deposit to DRIFT
+	const depositUsdcToDrift = await buildDriftDepositIx({
+		amountRaw: solendAmount,
+		token: tokenB,
+		repay: false,
+	})
+	const borrowSolFromDrift = buildDriftWithdrawIx({
+		amountRaw: liquidityInput.tokenEstA,
+		token: tokenA,
+		borrow: true,
+	})
 
 	instructions.push(
 		...initTickArrayIxs,
 		createPositionIx,
 		...depositLiquidityIxs,
-		...depositUsdcToSolendIx,
-		...borrowSolFromSolendIx,
-		closeWrappedSolIx,
+		depositUsdcToDrift,
+		borrowSolFromDrift,
 	)
 
 	const ALTAccount = await loadALTAccount()
@@ -138,6 +138,7 @@ export const openHedgedPosition = async ({
 		outputMint: tokenB.mint,
 		swapMode: 'ExactIn',
 		amountRaw: liquidityInput.tokenEstA,
+		unwrapSol: false,
 	})
 
 	return position

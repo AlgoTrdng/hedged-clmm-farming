@@ -13,5 +13,6 @@ module.exports = {
 	rules: {
 		semi: ['error', 'never'],
 		'comma-dangle': ['error', 'always-multiline'],
+		'@typescript-eslint/ban-ts-comment': 'warn',
 	},
 }

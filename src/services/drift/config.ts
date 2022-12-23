@@ -8,6 +8,7 @@ import {
 	configs,
 	MainnetSpotMarkets,
 	SpotMarketAccount,
+	UserStatsAccount,
 } from '@drift-labs/sdk'
 import { PublicKey } from '@solana/web3.js'
 
@@ -28,8 +29,29 @@ export const driftProgram = driftClient.program as unknown as Program<IDL>
 
 export const DRIFT_SIGNER = getDriftSignerPublicKey(DRIFT_PROGRAM_ID)
 export const DRIFT_STATE = await getDriftStateAccountPublicKey(DRIFT_PROGRAM_ID)
-export const DRIFT_USER = await getUserAccountPublicKey(DRIFT_PROGRAM_ID, wallet.publicKey, 0)
 export const DRIFT_USER_STATS = getUserStatsAccountPublicKey(DRIFT_PROGRAM_ID, wallet.publicKey)
+
+const getDriftUserData = async () => {
+	const driftUserStatsAI = await retryOnThrow(() => connection.getAccountInfo(DRIFT_USER_STATS))
+
+	let userAccountId = 0
+	if (driftUserStatsAI?.data) {
+		// @ts-ignore
+		const userStats = driftProgram.account.userStats.coder.accounts.decode(
+			'UserStats',
+			driftUserStatsAI.data,
+		) as UserStatsAccount
+		userAccountId = userStats.numberOfSubAccountsCreated
+	}
+
+	return {
+		DRIFT_USER_STATS_INITIALIZED: Boolean(driftUserStatsAI?.data),
+		DRIFT_USER_ACCOUNT_ID: userAccountId,
+		DRIFT_USER: await getUserAccountPublicKey(DRIFT_PROGRAM_ID, wallet.publicKey, userAccountId),
+	}
+}
+export const { DRIFT_USER_STATS_INITIALIZED, DRIFT_USER, DRIFT_USER_ACCOUNT_ID } =
+	await getDriftUserData()
 
 const getMarketIndex = (_mint: PublicKey) => {
 	const idx = MainnetSpotMarkets.findIndex(({ mint }) => mint.equals(_mint))
@@ -52,7 +74,7 @@ export const DRIFT_TOKEN_B_SPOT_MARKET = await getSpotMarketPublicKey(
 	DRIFT_TOKEN_B_MARKET_INDEX,
 )
 
-const spotMarketsAccounts = (
+const [tokenASpotMarket, tokenBSpotMarket] = (
 	await retryOnThrow(() =>
 		connection.getMultipleAccountsInfo([DRIFT_TOKEN_A_SPOT_MARKET, DRIFT_TOKEN_B_SPOT_MARKET]),
 	)
@@ -66,5 +88,7 @@ const spotMarketsAccounts = (
 	) as SpotMarketAccount
 })
 
-export const DRIFT_TOKEN_A_SPOT_VAULT = spotMarketsAccounts[0].vault
-export const DRIFT_TOKEN_B_SPOT_VAULT = spotMarketsAccounts[1].vault
+export const DRIFT_TOKEN_A_SPOT_VAULT = tokenASpotMarket.vault
+export const DRIFT_TOKEN_B_SPOT_VAULT = tokenBSpotMarket.vault
+
+export const DRIFT_TOKEN_A_ORACLE = tokenASpotMarket.oracle
