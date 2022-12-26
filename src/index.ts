@@ -99,10 +99,10 @@ await (async () => {
 
 	state.driftPosition = driftPosition
 	state.whirlpoolPosition = whirlpoolPosition
-	state.lastPrice = price
+	state.lastAdjustmentPrice = price
 	console.log(
 		'Hedged position opened\n',
-		`Current pool price: ${price.toFixed(6)}\n`,
+		`Current pool price: ${price}\n`,
 		`Upper boundary: ${upperBoundaryPrice.toFixed(6)}\n`,
 		`Lower boundary: ${lowerBoundaryPrice.toFixed(6)}\n`,
 	)
@@ -140,7 +140,6 @@ connection.onAccountChange(WHIRLPOOL_ADDRESS, async (ai) => {
 		lowerBoundaryPrice,
 	} = getPriceWithBoundariesFromSqrtPrice(whirlpoolData.sqrtPrice)
 
-	state.lastPrice = currentPoolPrice
 	console.log('Whirlpool price:', currentPoolPrice)
 
 	const positionInRange = isPriceInRange({
@@ -174,8 +173,9 @@ connection.onAccountChange(WHIRLPOOL_ADDRESS, async (ai) => {
 		whirlpoolPositionData: state.whirlpoolPosition,
 	})
 	console.log('New drift position borrowed amount: ', adjustedDriftPosition.borrowAmount)
-	
+
 	state.driftPosition = adjustedDriftPosition
+	state.lastAdjustmentPrice = currentPoolPrice
 	adjustingPriceRange = false
 })
 
@@ -190,7 +190,7 @@ while (true) {
 	const currentPoolPrice = getPriceFromSqrtPrice(whirlpoolData.sqrtPrice)
 	console.log('Current pool price:', currentPoolPrice)
 
-	if (currentPoolPrice === state.lastPrice || adjustingPriceRange) {
+	if (currentPoolPrice === state.lastAdjustmentPrice || adjustingPriceRange) {
 		continue
 	}
 
@@ -205,5 +205,6 @@ while (true) {
 	console.log('New drift position borrowed amount: ', adjustedDriftPosition.borrowAmount)
 
 	state.driftPosition = adjustedDriftPosition
+	state.lastAdjustmentPrice = currentPoolPrice
 	adjustingDriftPosition = false
 }

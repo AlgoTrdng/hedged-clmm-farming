@@ -18,7 +18,7 @@ export type State =
 	| {
 			whirlpoolPosition: WhirlpoolPosition
 			driftPosition: DriftPosition
-			lastPrice: number
+			lastAdjustmentPrice: number
 	  }
 	| Record<string, never>
 

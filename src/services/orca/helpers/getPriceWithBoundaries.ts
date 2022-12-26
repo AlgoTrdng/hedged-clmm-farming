@@ -4,7 +4,11 @@ import BN from 'bn.js'
 import { lowerBoundaryBps, tokenA, tokenB, upperBoundaryBps } from '../../../global.js'
 
 export const getPriceFromSqrtPrice = (sqrtPrice: BN) =>
-	PriceMath.sqrtPriceX64ToPrice(sqrtPrice, tokenA.decimals, tokenB.decimals).toNumber()
+	Number(
+		PriceMath.sqrtPriceX64ToPrice(sqrtPrice, tokenA.decimals, tokenB.decimals)
+			.toNumber()
+			.toFixed(tokenB.decimals),
+	)
 
 export const getBoundariesPricesFromPrice = (price: number) => {
 	const upperBoundaryPrice = price * (1 + upperBoundaryBps)
