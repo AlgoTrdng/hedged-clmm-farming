@@ -39,10 +39,8 @@ export const buildCreatePositionIx = ({
 	return {
 		instruction: instructions[0],
 		signers: [positionMintKeypair],
-		position: {
-			mint: positionMintKeypair.publicKey,
-			PDAddress: positionPDAddress.publicKey,
-			ATAddress: positionATAddress,
-		},
+		positionMint: positionMintKeypair.publicKey,
+		PDAddress: positionPDAddress.publicKey,
+		ATAddress: positionATAddress,
 	}
 }

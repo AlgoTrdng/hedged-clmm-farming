@@ -10,7 +10,7 @@ import {
 	DRIFT_USER_STATS_INITIALIZED,
 } from '../config.js'
 
-export const buildDriftInitializeUserIx = async () => {
+export const buildDriftInitializeUserIx = () => {
 	const ixs: TransactionInstruction[] = []
 
 	if (!DRIFT_USER_STATS_INITIALIZED) {

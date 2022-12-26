@@ -12,11 +12,7 @@ type BuildDriftDepositIxParams = {
 	repay: boolean
 }
 
-export const buildDriftDepositIx = ({
-	amountRaw,
-	token,
-	repay,
-}: BuildDriftDepositIxParams) => {
+export const buildDriftDepositIx = ({ amountRaw, token, repay }: BuildDriftDepositIxParams) => {
 	const [marketIndex, marketVault] = mapTokenToMarket(token.mint.toString())
 	const additionalAccounts = buildAdditionalAccounts(marketIndex)
 

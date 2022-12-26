@@ -6,13 +6,15 @@ import {
 } from '@solana/web3.js'
 import { BuiltTransactionData } from 'solana-tx-utils'
 import fetch from 'node-fetch'
+import { setTimeout } from 'node:timers/promises'
 
 import { wallet, connection } from '../../global.js'
 import { retryOnThrow } from '../../utils/retryOnThrow.js'
-import { ExecuteJupiterSwapParams, JupiterQuoteResponse, JupiterSwapResponse } from './types.js'
+import { ExecuteJupiterSwapParams, JupiterSwapResponse } from './types.js'
+import { fetchBestRoute } from './fetchBestRoute.js'
 
-const JUPITER_QUOTE_API = 'https://quote-api.jup.ag/v4/quote?slippageBps=10'
-const JUPITER_SWAP_API = 'https://quote-api.jup.ag/v4/swap'
+export const JUPITER_QUOTE_API = 'https://quote-api.jup.ag/v4/quote?slippageBps=10'
+export const JUPITER_SWAP_API = 'https://quote-api.jup.ag/v4/swap'
 
 const _fetchEncodedTx = async ({
 	inputMint,
@@ -21,32 +23,32 @@ const _fetchEncodedTx = async ({
 	swapMode,
 	unwrapSol,
 }: ExecuteJupiterSwapParams): Promise<VersionedTransaction> => {
-	const urlParams = new URLSearchParams({
-		inputMint: inputMint.toString(),
-		outputMint: outputMint.toString(),
-		amount: amountRaw.toString(),
+	const bestRoute = await fetchBestRoute({
+		inputMint,
+		outputMint,
+		amountRaw,
 		swapMode,
 	})
-	try {
-		const { data: routesInfos } = (await (
-			await fetch(`${JUPITER_QUOTE_API}&${urlParams.toString()}`)
-		).json()) as JupiterQuoteResponse
-		const res = (await (
-			await fetch(JUPITER_SWAP_API, {
-				method: 'POST',
-				headers: {
-					'Content-Type': 'application/json',
-				},
-				body: JSON.stringify({
-					route: routesInfos[0],
-					userPublicKey: wallet.publicKey.toString(),
-					wrapUnwrapSOL: unwrapSol,
-				}),
-			})
-		).json()) as JupiterSwapResponse
-		return VersionedTransaction.deserialize(Buffer.from(res.swapTransaction, 'base64'))
-	} catch (error) {
-		return _fetchEncodedTx({ inputMint, outputMint, amountRaw, swapMode })
+
+	while (true) {
+		try {
+			const res = (await (
+				await fetch(JUPITER_SWAP_API, {
+					method: 'POST',
+					headers: {
+						'Content-Type': 'application/json',
+					},
+					body: JSON.stringify({
+						route: bestRoute,
+						userPublicKey: wallet.publicKey.toString(),
+						wrapUnwrapSOL: unwrapSol,
+					}),
+				})
+			).json()) as JupiterSwapResponse
+			return VersionedTransaction.deserialize(Buffer.from(res.swapTransaction, 'base64'))
+		} catch {
+			await setTimeout(500)
+		}
 	}
 }
 

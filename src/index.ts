@@ -1,40 +1,72 @@
-import { TransactionInstruction } from '@solana/web3.js'
-import { ParsableWhirlpool, PoolUtil, PriceMath } from '@orca-so/whirlpools-sdk'
+import { PublicKey, TransactionInstruction } from '@solana/web3.js'
+import { ParsableWhirlpool } from '@orca-so/whirlpools-sdk'
+import {
+	createAssociatedTokenAccountInstruction,
+	getAssociatedTokenAddressSync,
+} from '@solana/spl-token'
+import { buildAndSignTxFromInstructions } from 'solana-tx-utils'
 import { setTimeout } from 'node:timers/promises'
-import { createAssociatedTokenAccountInstruction } from '@solana/spl-token'
-import { buildAndSignTxFromInstructions, sendTransaction } from 'solana-tx-utils'
 
 import { getWhirlpoolData } from './services/orca/getWhirlpoolData.js'
-import { connection, fetcher, tokenA, tokenB, wallet } from './global.js'
+import { connection, wallet } from './global.js'
 import { USDC_POSITION_SIZE, WHIRLPOOL_ADDRESS } from './config.js'
 import { openHedgedPosition } from './actions/openHedgedPosition.js'
-import { getPriceWithBoundaries } from './services/orca/helpers/getPriceWithBoundaries.js'
-import { State } from './types.js'
+import {
+	getPriceFromSqrtPrice,
+	getPriceWithBoundariesFromSqrtPrice,
+} from './services/orca/helpers/getPriceWithBoundaries.js'
 import { retryOnThrow } from './utils/retryOnThrow.js'
 import { buildDriftInitializeUserIx } from './services/drift/instructions/initializeUser.js'
 import { forceSendTx } from './utils/forceSendTx.js'
+import { isPriceInRange } from './services/orca/helpers/isPriceInRange.js'
+import { adjustPriceRange } from './actions/adjustPriceRange.js'
+import { adjustDriftPosition } from './actions/adjustDriftPosition.js'
+import { state } from './state.js'
+
+// Fetch and update whirlpoolData
+let whirlpoolData = await getWhirlpoolData()
 
 /* ---- SETUP ---- */
 await (async () => {
 	const instructions: TransactionInstruction[] = []
 
-	const setupDriftIxs = await buildDriftInitializeUserIx()
+	const setupDriftIxs = buildDriftInitializeUserIx()
 	instructions.push(...setupDriftIxs)
 
-	const wSolATAccount = await retryOnThrow(() => connection.getAccountInfo(tokenA.ATAddress))
-	if (!wSolATAccount?.data) {
-		instructions.push(
-			createAssociatedTokenAccountInstruction(
-				wallet.publicKey,
-				tokenA.ATAddress,
-				wallet.publicKey,
-				tokenA.mint,
-			),
-		)
-	}
+	// Initialize all ATAs
+	const accountsMintsToInitialize: PublicKey[] = []
+	const accountsAddressesToInitialize: PublicKey[] = []
+
+	whirlpoolData.rewardInfos.forEach(({ mint }) => {
+		if (
+			mint.equals(PublicKey.default) ||
+			accountsMintsToInitialize.findIndex((_mint) => _mint.equals(mint)) > 0
+		) {
+			return
+		}
+		const ATAddress = getAssociatedTokenAddressSync(mint, wallet.publicKey)
+		accountsMintsToInitialize.push(mint)
+		accountsAddressesToInitialize.push(ATAddress)
+	})
+
+	const ATAccountsInfo = await retryOnThrow(() =>
+		connection.getMultipleAccountsInfo(accountsAddressesToInitialize),
+	)
+	ATAccountsInfo.forEach((ai, i) => {
+		if (!ai?.data) {
+			instructions.push(
+				createAssociatedTokenAccountInstruction(
+					wallet.publicKey,
+					accountsAddressesToInitialize[i],
+					wallet.publicKey,
+					accountsMintsToInitialize[i],
+				),
+			)
+		}
+	})
 
 	if (instructions.length) {
-		console.log('INITIALIZING')
+		console.log('Creating accounts')
 		await forceSendTx(() =>
 			buildAndSignTxFromInstructions(
 				{
@@ -47,86 +79,131 @@ await (async () => {
 	}
 })()
 
-const state: State = {
-	whirlpool: null,
-}
-
+/* ---- INIT ----
+	- Open hedged position
+		- deposit to whirlpool
+		- hedge on drift
+*/
 await (async () => {
-	const whirlpoolData = await getWhirlpoolData()
-	const { price, upperBoundaryPrice, lowerBoundaryPrice } = getPriceWithBoundaries(
+	console.log('Opening position')
+	whirlpoolData = await getWhirlpoolData()
+	const { price, upperBoundaryPrice, lowerBoundaryPrice } = getPriceWithBoundariesFromSqrtPrice(
 		whirlpoolData.sqrtPrice,
 	)
-	const whirlpoolPosition = await openHedgedPosition({
+	const { driftPosition, whirlpoolPosition } = await openHedgedPosition({
 		usdcAmountRaw: USDC_POSITION_SIZE * 10 ** 6,
 		upperBoundaryPrice,
 		lowerBoundaryPrice,
+		whirlpoolData,
 	})
-	state.whirlpool = {
-		price,
-		upperBoundaryPrice,
-		lowerBoundaryPrice,
-		position: whirlpoolPosition,
-	}
+
+	state.driftPosition = driftPosition
+	state.whirlpoolPosition = whirlpoolPosition
+	state.lastPrice = price
+	console.log(
+		'Hedged position opened\n',
+		`Current pool price: ${price.toFixed(6)}\n`,
+		`Upper boundary: ${upperBoundaryPrice.toFixed(6)}\n`,
+		`Lower boundary: ${lowerBoundaryPrice.toFixed(6)}\n`,
+	)
 })()
 
-console.log(state)
-
 /*
-  HEDGE RE-BALANCING
+  HEDGE Adjusting
   - keep track of pool price
     - if price is > last_price
       - repay the difference in SOL liquidity between prev and current
     - if price < last_price
       - borrow the difference in SOL
 
-  PRICE RANGE ADJUSTING
+  PRICE RANGE Adjusting
   - if price reaches 80% of the price range
     - close position
     - open position with new price range
     - borrow or repay SOL difference between prev and current position
 */
 
-/* eslint-disable @typescript-eslint/no-non-null-assertion */
-// const UPDATE_TIMEOUT = 30_000
-// let lastUpdate = 0
+let adjustingPriceRange = false
+let adjustingDriftPosition = false
 
-// let lastPrice = state.whirlpool!.price
+connection.onAccountChange(WHIRLPOOL_ADDRESS, async (ai) => {
+	const _whirlpoolData = ParsableWhirlpool.parse(ai.data)
+	if (!_whirlpoolData) {
+		return
+	}
+	whirlpoolData = _whirlpoolData
 
-// connection.onAccountChange(WHIRLPOOL_ADDRESS, async (ai) => {
-// 	const whirlpoolData = ParsableWhirlpool.parse(ai.data)
-// 	if (!whirlpoolData) {
-// 		return
-// 	}
-// 	const price = PriceMath.sqrtPriceX64ToPrice(
-// 		whirlpoolData.sqrtPrice,
-// 		tokenA.decimals,
-// 		tokenB.decimals,
-// 	).toNumber()
+	// ---- PRICE RANGE ADJUSTING ----
+	const {
+		price: currentPoolPrice,
+		upperBoundaryPrice,
+		lowerBoundaryPrice,
+	} = getPriceWithBoundariesFromSqrtPrice(whirlpoolData.sqrtPrice)
 
-// 	if (price === lastPrice || lastUpdate + UPDATE_TIMEOUT > new Date().getTime()) {
-// 		return
-// 	}
+	state.lastPrice = currentPoolPrice
+	console.log('Whirlpool price:', currentPoolPrice)
 
-// 	const position = await retryOnThrow(() =>
-// 		fetcher.getPosition(state.whirlpool!.position.PDAddress),
-// 	)
-// 	if (!position) {
-// 		return
-// 	}
+	const positionInRange = isPriceInRange({
+		positionTickLowerIndex: state.whirlpoolPosition.tickLowerIndex,
+		positionTickUpperIndex: state.whirlpoolPosition.tickUpperIndex,
+		currentPoolPrice,
+	})
 
-// 	const lowerBoundarySqrtPrice = PriceMath.tickIndexToSqrtPriceX64(position.tickLowerIndex)
-// 	const upperBoundarySqrtPrice = PriceMath.tickIndexToSqrtPriceX64(position.tickUpperIndex)
+	if (positionInRange || adjustingDriftPosition) {
+		return
+	}
 
-// 	const { tokenA: tokenAAmount } = PoolUtil.getTokenAmountsFromLiquidity(
-// 		position.liquidity,
-// 		whirlpoolData.sqrtPrice,
-// 		lowerBoundarySqrtPrice,
-// 		upperBoundarySqrtPrice,
-// 		false,
-// 	)
+	adjustingPriceRange = true
 
-// 	console.log(tokenAAmount.toNumber())
+	console.log('Adjusting position price range')
+	const adjustedWhirlpoolPosition = await adjustPriceRange({
+		whirlpoolPosition: state.whirlpoolPosition,
+		currentPrice: currentPoolPrice,
+		whirlpoolData,
+	})
+	state.whirlpoolPosition = adjustedWhirlpoolPosition
+	console.log(
+		'Adjusted whirlpool position\n',
+		`Upper boundary: ${upperBoundaryPrice.toFixed(6)}\n`,
+		`Lower boundary: ${lowerBoundaryPrice.toFixed(6)}\n`,
+	)
 
-// 	lastPrice = price
-// 	lastUpdate = new Date().getTime()
-// })
+	console.log('Adjusting drift position')
+	const adjustedDriftPosition = await adjustDriftPosition({
+		driftPosition: state.driftPosition,
+		whirlpoolPositionData: state.whirlpoolPosition,
+	})
+	console.log('New drift position borrowed amount: ', adjustedDriftPosition.borrowAmount)
+	
+	state.driftPosition = adjustedDriftPosition
+	adjustingPriceRange = false
+})
+
+// 30 min
+const UPDATE_TIMEOUT = 1000 * 60 * 30
+
+// TODO: collect fees and rewards
+// ---- HEDGED POSITION ADJUSTING ----
+while (true) {
+	await setTimeout(UPDATE_TIMEOUT)
+
+	const currentPoolPrice = getPriceFromSqrtPrice(whirlpoolData.sqrtPrice)
+	console.log('Current pool price:', currentPoolPrice)
+
+	if (currentPoolPrice === state.lastPrice || adjustingPriceRange) {
+		continue
+	}
+
+	adjustingDriftPosition = true
+
+	console.log('Adjusting drift position')
+	const adjustedDriftPosition = await adjustDriftPosition({
+		driftPosition: state.driftPosition,
+		whirlpoolPositionData: state.whirlpoolPosition,
+		whirlpoolSqrtPrice: whirlpoolData.sqrtPrice,
+	})
+	console.log('New drift position borrowed amount: ', adjustedDriftPosition.borrowAmount)
+
+	state.driftPosition = adjustedDriftPosition
+	adjustingDriftPosition = false
+}

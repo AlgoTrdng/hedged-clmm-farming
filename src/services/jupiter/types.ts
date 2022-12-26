@@ -20,7 +20,7 @@ type MarketInfo = {
 	platformFee: Fee
 }
 
-type Data = {
+export type RouteInfo = {
 	inAmount: string
 	outAmount: string
 	priceImpactPct: number
@@ -32,7 +32,7 @@ type Data = {
 }
 
 export type JupiterQuoteResponse = {
-	data: Data[]
+	data: RouteInfo[]
 	timeTaken: number
 	contextSlot: number
 }

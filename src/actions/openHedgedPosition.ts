@@ -1,109 +1,83 @@
 import { sendTransaction, buildAndSignTxFromInstructions } from 'solana-tx-utils'
-import {
-	increaseLiquidityQuoteByInputTokenWithParams,
-	ORCA_WHIRLPOOL_PROGRAM_ID,
-} from '@orca-so/whirlpools-sdk'
-import { BN } from 'bn.js'
+import { ORCA_WHIRLPOOL_PROGRAM_ID, WhirlpoolData } from '@orca-so/whirlpools-sdk'
 
-import { SLIPPAGE_TOLERANCE } from '../constants.js'
 import { connection, tokenA, tokenB, wallet } from '../global.js'
-import { buildInitTickArrayIx } from '../services/orca/instructions/initTickArray.js'
-import { getBoundariesTickIndexes } from '../services/orca/helpers/getBoundariesTickIndex.js'
-import { getWhirlpoolData } from '../services/orca/getWhirlpoolData.js'
-import { buildCreatePositionIx } from '../services/orca/instructions/createPosition.js'
-import { buildDepositLiquidityIx } from '../services/orca/instructions/depositLiquidity.js'
 import { fetchJupiterInstructions } from '../services/jupiter/transaction.js'
-import { executeJupiterSwap } from '../services/jupiter/swap.js'
 import { loadALTAccount } from '../utils/loadALTAccount.js'
-import { SavedWhirlpoolPosition } from '../types.js'
 import { buildDriftDepositIx } from '../services/drift/instructions/deposit.js'
 import { buildDriftWithdrawIx } from '../services/drift/instructions/withdraw.js'
+import { buildOpenWhirlpoolPositionIx } from '../instructions/openWhirlpoolPosition.js'
+import { executeJupiterSwap } from '../services/jupiter/swap.js'
+import { DriftPosition, WhirlpoolPosition } from '../state.js'
 
 type OpenHedgedPositionParams = {
 	usdcAmountRaw: number
 	upperBoundaryPrice: number
 	lowerBoundaryPrice: number
+	whirlpoolData: WhirlpoolData
+}
+
+type HedgedPosition = {
+	whirlpoolPosition: WhirlpoolPosition
+	driftPosition: DriftPosition
 }
 
 export const openHedgedPosition = async ({
 	usdcAmountRaw,
 	upperBoundaryPrice,
 	lowerBoundaryPrice,
-}: OpenHedgedPositionParams): Promise<SavedWhirlpoolPosition> => {
-	const orcaAmount = Math.floor(usdcAmountRaw * 0.55)
-	const solendAmount = usdcAmountRaw - orcaAmount
+	whirlpoolData,
+}: OpenHedgedPositionParams): Promise<HedgedPosition> => {
+	const orcaAmount = Math.floor(usdcAmountRaw * 0.5)
+	const collateralAmount = usdcAmountRaw - orcaAmount
 
-	const whirlpoolData = await getWhirlpoolData()
-
-	const { tickLowerIndex, tickUpperIndex } = getBoundariesTickIndexes({
-		tickSpacing: whirlpoolData.tickSpacing,
-		upperBoundary: upperBoundaryPrice,
-		lowerBoundary: lowerBoundaryPrice,
-	})
-	const liquidityInput = increaseLiquidityQuoteByInputTokenWithParams({
-		inputTokenMint: tokenB.mint,
-		inputTokenAmount: new BN(orcaAmount * 0.5),
-		slippageTolerance: SLIPPAGE_TOLERANCE,
-		tickLowerIndex,
-		tickUpperIndex,
-		...whirlpoolData,
+	// Deposit to Orca
+	const {
+		instructions: openWhirlpoolPositionIxs,
+		additionalSigners,
+		depositAmounts,
+		...whirlpoolPosition
+	} = await buildOpenWhirlpoolPositionIx({
+		whirlpoolData,
+		amountRaw: orcaAmount,
+		upperBoundaryPrice,
+		lowerBoundaryPrice,
 	})
 
 	// Swap USDC to SOL
-	const { instructions, ATLAccounts } = await fetchJupiterInstructions({
-		inputMint: tokenB.mint,
-		outputMint: tokenA.mint,
-		amountRaw: liquidityInput.tokenEstA.toNumber(),
-		swapMode: 'ExactOut',
-		unwrapSol: false,
-	})
-
-	// Deposit to ORCA
-	const initTickArrayIxs = await buildInitTickArrayIx(whirlpoolData)
-	const {
-		position,
-		instruction: createPositionIx,
-		signers,
-	} = buildCreatePositionIx({
-		tickLowerIndex,
-		tickUpperIndex,
-	})
-	const depositLiquidityIxs = buildDepositLiquidityIx({
-		positionATAddress: position.ATAddress,
-		positionPDAddress: position.PDAddress,
-		whirlpoolData,
-		tickLowerIndex,
-		tickUpperIndex,
-		liquidityInput,
-	})
+	const { instructions: prepareDepositAmountsIxs, ATLAccounts: prepareIxALTAccounts } =
+		await fetchJupiterInstructions({
+			inputMint: tokenB.mint,
+			outputMint: tokenA.mint,
+			amountRaw: depositAmounts.tokenA,
+			swapMode: 'ExactOut',
+			unwrapSol: false,
+		})
 
 	// Deposit to DRIFT
-	const depositUsdcToDrift = await buildDriftDepositIx({
-		amountRaw: solendAmount,
+	const depositUsdcToDrift = buildDriftDepositIx({
+		amountRaw: collateralAmount,
 		token: tokenB,
 		repay: false,
 	})
 	const borrowSolFromDrift = buildDriftWithdrawIx({
-		amountRaw: liquidityInput.tokenEstA,
+		amountRaw: depositAmounts.tokenA,
 		token: tokenA,
 		borrow: true,
 	})
-
-	instructions.push(
-		...initTickArrayIxs,
-		createPositionIx,
-		...depositLiquidityIxs,
-		depositUsdcToDrift,
-		borrowSolFromDrift,
-	)
 
 	const ALTAccount = await loadALTAccount()
 	const tx = await buildAndSignTxFromInstructions(
 		{
 			payerKey: wallet.publicKey,
-			signers: [wallet, ...signers],
-			addressLookupTables: [ALTAccount, ...ATLAccounts],
-			instructions,
+			signers: [wallet, ...additionalSigners],
+			addressLookupTables: [ALTAccount, ...prepareIxALTAccounts],
+			instructions: [
+				...prepareDepositAmountsIxs,
+				...openWhirlpoolPositionIxs,
+				depositUsdcToDrift,
+				borrowSolFromDrift,
+			],
 		},
 		connection,
 	)
@@ -128,18 +102,25 @@ export const openHedgedPosition = async ({
 				usdcAmountRaw,
 				upperBoundaryPrice,
 				lowerBoundaryPrice,
+				whirlpoolData,
 			})
 		}
 	}
 
-	// Swap borrowed SOL for USDC
+	// Sell borrowed SOL
 	await executeJupiterSwap({
 		inputMint: tokenA.mint,
 		outputMint: tokenB.mint,
 		swapMode: 'ExactIn',
-		amountRaw: liquidityInput.tokenEstA,
+		amountRaw: depositAmounts.tokenA,
 		unwrapSol: false,
 	})
 
-	return position
+	return {
+		driftPosition: {
+			collateralAmount,
+			borrowAmount: depositAmounts.tokenA,
+		},
+		whirlpoolPosition,
+	}
 }

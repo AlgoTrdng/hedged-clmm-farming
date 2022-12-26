@@ -1,4 +1,4 @@
-import { TickUtil, PriceMath } from '@orca-so/whirlpools-sdk'
+import { TickUtil, PriceMath, PositionData } from '@orca-so/whirlpools-sdk'
 import Decimal from 'decimal.js'
 
 import { tokenA, tokenB } from '../../../global.js'
@@ -9,11 +9,13 @@ type GetBoundariesTicksParams = {
 	tickSpacing: number
 }
 
+export type PositionPriceRangeTickIndexes = Pick<PositionData, 'tickLowerIndex' | 'tickUpperIndex'>
+
 export const getBoundariesTickIndexes = ({
 	upperBoundary,
 	lowerBoundary,
 	tickSpacing,
-}: GetBoundariesTicksParams) => {
+}: GetBoundariesTicksParams): PositionPriceRangeTickIndexes => {
 	const tickUpperIndex = TickUtil.getInitializableTickIndex(
 		PriceMath.priceToTickIndex(new Decimal(upperBoundary), tokenA.decimals, tokenB.decimals),
 		tickSpacing,
