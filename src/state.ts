@@ -17,6 +17,7 @@ export type DriftPosition = {
 export type State =
 	| {
 			whirlpoolPosition: WhirlpoolPosition
+			priceMoveWithoutDriftAdjustment: number
 			driftPosition: DriftPosition
 			lastAdjustmentPrice: number
 	  }

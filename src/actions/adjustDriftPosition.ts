@@ -8,7 +8,7 @@ import { connection, tokenA, tokenB, wallet } from '../global.js'
 import { buildDriftDepositIx } from '../services/drift/instructions/deposit.js'
 import { buildDriftWithdrawIx } from '../services/drift/instructions/withdraw.js'
 import { fetchJupiterInstructions } from '../services/jupiter/transaction.js'
-import { getWhirlpoolData } from '../services/orca/getWhirlpoolData.js'
+import { fetchWhirlpoolData } from '../services/orca/getWhirlpoolData.js'
 import { loadALTAccount } from '../utils/loadALTAccount.js'
 import { DriftPosition, WhirlpoolPosition } from '../state.js'
 
@@ -24,7 +24,7 @@ export const adjustDriftPosition = async ({
 	whirlpoolSqrtPrice,
 }: AdjustHedgePositionParams): Promise<DriftPosition> => {
 	const sqrtPrice =
-		whirlpoolSqrtPrice !== undefined ? whirlpoolSqrtPrice : (await getWhirlpoolData()).sqrtPrice
+		whirlpoolSqrtPrice !== undefined ? whirlpoolSqrtPrice : (await fetchWhirlpoolData()).sqrtPrice
 	const ALTAccountPromise = loadALTAccount()
 
 	const { liquidity, tickLowerIndex, tickUpperIndex } = whirlpoolPositionData

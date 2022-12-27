@@ -9,11 +9,11 @@ import { buildCloseWhirlpoolPositionIxs } from '../instructions/closeWhirlpoolPo
 import { buildOpenWhirlpoolPositionIx } from '../instructions/openWhirlpoolPosition.js'
 import { fetchBestRoute } from '../services/jupiter/fetchBestRoute.js'
 import { fetchJupiterInstructions } from '../services/jupiter/transaction.js'
-import { getWhirlpoolData } from '../services/orca/getWhirlpoolData.js'
+import { fetchWhirlpoolData } from '../services/orca/getWhirlpoolData.js'
 import {
 	getBoundariesPricesFromPrice,
 	getPriceFromSqrtPrice,
-} from '../services/orca/helpers/getPriceWithBoundaries.js'
+} from '../services/orca/helpers/priceHelpers.js'
 import { loadALTAccount } from '../utils/loadALTAccount.js'
 import { WhirlpoolPosition } from '../state.js'
 
@@ -123,7 +123,7 @@ export const adjustPriceRange = async ({
 			}
 			case 'BLOCK_HEIGHT_EXCEEDED':
 			case 'ERROR': {
-				const _whirlpoolData = await getWhirlpoolData()
+				const _whirlpoolData = await fetchWhirlpoolData()
 				return adjustPriceRange({
 					whirlpoolPosition: whirlpoolPosition,
 					whirlpoolData: _whirlpoolData,
