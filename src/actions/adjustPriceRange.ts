@@ -8,7 +8,6 @@ import { connection, tokenA, tokenB, wallet } from '../global.js'
 import { buildCloseWhirlpoolPositionIxs } from '../instructions/closeWhirlpoolPosition.js'
 import { buildOpenWhirlpoolPositionIx } from '../instructions/openWhirlpoolPosition.js'
 import { fetchBestRoute } from '../services/jupiter/fetchBestRoute.js'
-import { fetchJupiterInstructions } from '../services/jupiter/transaction.js'
 import { fetchWhirlpoolData } from '../services/orca/getWhirlpoolData.js'
 import {
 	getBoundariesPricesFromPrice,
@@ -16,6 +15,8 @@ import {
 } from '../services/orca/helpers/priceHelpers.js'
 import { loadALTAccount } from '../utils/loadALTAccount.js'
 import { WhirlpoolPosition } from '../state.js'
+import { buildSwapIx } from '../services/orca/instructions/swap.js'
+import { fetchJupiterInstructions } from '../services/jupiter/transaction.js'
 
 type AdjustPriceRangeParams = {
 	whirlpoolPosition: WhirlpoolPosition
@@ -69,30 +70,24 @@ export const adjustPriceRange = async ({
 	const swapInstructions: TransactionInstruction[] = []
 	const ALTAccounts: AddressLookupTableAccount[] = []
 
-	const tokenBDiff = depositAmounts.tokenB - withdrawAmounts.tokenB
 	const tokenADiff = depositAmounts.tokenA - withdrawAmounts.tokenA
-	if (tokenBDiff > 0) {
+
+	if (tokenADiff < 0) {
 		// need to swap SOL to USDC
-		const { instructions, ATLAccounts: _ATLAccounts } = await fetchJupiterInstructions({
-			swapMode: 'ExactOut',
+		const { instructions: swapIxs, ATLAccounts: swapALTAccounts } = await fetchJupiterInstructions({
 			inputMint: tokenA.mint,
 			outputMint: tokenB.mint,
 			unwrapSol: false,
-			amountRaw: tokenBDiff,
+			swapMode: 'ExactIn',
+			amountRaw: Math.abs(tokenADiff),
+			onlyDirectRoutes: true,
 		})
-		swapInstructions.push(...instructions)
-		ALTAccounts.push(..._ATLAccounts)
+		swapInstructions.push(...swapIxs)
+		ALTAccounts.push(...swapALTAccounts)
 	} else if (tokenADiff > 0) {
 		// need to swap USDC to SOL
-		const { instructions, ATLAccounts: _ATLAccounts } = await fetchJupiterInstructions({
-			swapMode: 'ExactOut',
-			inputMint: tokenB.mint,
-			outputMint: tokenA.mint,
-			unwrapSol: false,
-			amountRaw: tokenADiff,
-		})
-		swapInstructions.push(...instructions)
-		ALTAccounts.push(..._ATLAccounts)
+		const ix = await buildSwapIx({ outAmount: tokenADiff, aToB: false })
+		swapInstructions.push(ix)
 	}
 
 	const ALTAccount = await ALTAccountPromise
@@ -119,6 +114,11 @@ export const adjustPriceRange = async ({
 		)
 		switch (res.status) {
 			case 'SUCCESS': {
+				console.log(
+					'Whirlpool position balances:\n',
+					`TokenA: ${depositAmounts.tokenA}\n`,
+					`TokenB: ${depositAmounts.tokenB}\n`,
+				)
 				return adjustedWhirlpoolPosition
 			}
 			case 'BLOCK_HEIGHT_EXCEEDED':

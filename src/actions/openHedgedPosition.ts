@@ -2,13 +2,13 @@ import { sendTransaction, buildAndSignTxFromInstructions } from 'solana-tx-utils
 import { ORCA_WHIRLPOOL_PROGRAM_ID, WhirlpoolData } from '@orca-so/whirlpools-sdk'
 
 import { connection, tokenA, tokenB, wallet } from '../global.js'
-import { fetchJupiterInstructions } from '../services/jupiter/transaction.js'
 import { loadALTAccount } from '../utils/loadALTAccount.js'
 import { buildDriftDepositIx } from '../services/drift/instructions/deposit.js'
 import { buildDriftWithdrawIx } from '../services/drift/instructions/withdraw.js'
 import { buildOpenWhirlpoolPositionIx } from '../instructions/openWhirlpoolPosition.js'
 import { executeJupiterSwap } from '../services/jupiter/swap.js'
 import { DriftPosition, WhirlpoolPosition } from '../state.js'
+import { buildSwapIx } from '../services/orca/instructions/swap.js'
 
 type OpenHedgedPositionParams = {
 	usdcAmountRaw: number
@@ -45,14 +45,7 @@ export const openHedgedPosition = async ({
 	})
 
 	// Swap USDC to SOL
-	const { instructions: prepareDepositAmountsIxs, ATLAccounts: prepareIxALTAccounts } =
-		await fetchJupiterInstructions({
-			inputMint: tokenB.mint,
-			outputMint: tokenA.mint,
-			amountRaw: depositAmounts.tokenA,
-			swapMode: 'ExactOut',
-			unwrapSol: false,
-		})
+	const prepareDepositAmountIx = await buildSwapIx({ outAmount: depositAmounts.tokenA })
 
 	// Deposit to DRIFT
 	const depositUsdcToDrift = buildDriftDepositIx({
@@ -71,9 +64,9 @@ export const openHedgedPosition = async ({
 		{
 			payerKey: wallet.publicKey,
 			signers: [wallet, ...additionalSigners],
-			addressLookupTables: [ALTAccount, ...prepareIxALTAccounts],
+			addressLookupTables: [ALTAccount],
 			instructions: [
-				...prepareDepositAmountsIxs,
+				prepareDepositAmountIx,
 				...openWhirlpoolPositionIxs,
 				depositUsdcToDrift,
 				borrowSolFromDrift,
@@ -91,6 +84,11 @@ export const openHedgedPosition = async ({
 			{ log: true },
 		)
 		if (depositLiquidityAndBorrowRes.status === 'SUCCESS') {
+			console.log(
+				'Whirlpool position balances:\n',
+				`TokenA: ${depositAmounts.tokenA}\n`,
+				`TokenB: ${depositAmounts.tokenB}\n`,
+			)
 			break
 		}
 		if (

@@ -10,6 +10,7 @@ export const fetchBestRoute = async ({
 	outputMint,
 	amountRaw,
 	swapMode,
+	onlyDirectRoutes,
 }: Omit<ExecuteJupiterSwapParams, 'unwrapSol'>): Promise<RouteInfo> => {
 	const urlParams = new URLSearchParams({
 		inputMint: inputMint.toString(),
@@ -17,6 +18,9 @@ export const fetchBestRoute = async ({
 		amount: amountRaw.toString(),
 		swapMode,
 	})
+	if (onlyDirectRoutes) {
+		urlParams.set('onlyDirectRoutes', 'true')
+	}
 	try {
 		const { data: routesInfos } = (await (
 			await fetch(`${JUPITER_QUOTE_API}&${urlParams.toString()}`)

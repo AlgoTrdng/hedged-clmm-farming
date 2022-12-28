@@ -49,4 +49,5 @@ export type ExecuteJupiterSwapParams = {
 	amountRaw: number | BN
 	swapMode: SwapMode
 	unwrapSol?: boolean
+	onlyDirectRoutes?: boolean
 }

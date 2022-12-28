@@ -11,6 +11,7 @@ export const executeJupiterSwap = async ({
 	amountRaw,
 	swapMode,
 	unwrapSol = true,
+	onlyDirectRoutes,
 }: ExecuteJupiterSwapParams) => {
 	const _fetchTxs = () =>
 		fetchAndSignJupiterTransaction({
@@ -19,6 +20,7 @@ export const executeJupiterSwap = async ({
 			amountRaw,
 			swapMode,
 			unwrapSol,
+			onlyDirectRoutes,
 		})
 	let tx = await _fetchTxs()
 

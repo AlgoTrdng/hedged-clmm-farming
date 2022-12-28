@@ -22,12 +22,14 @@ const _fetchEncodedTx = async ({
 	amountRaw,
 	swapMode,
 	unwrapSol,
+	onlyDirectRoutes,
 }: ExecuteJupiterSwapParams): Promise<VersionedTransaction> => {
 	const bestRoute = await fetchBestRoute({
 		inputMint,
 		outputMint,
 		amountRaw,
 		swapMode,
+		onlyDirectRoutes,
 	})
 
 	while (true) {
@@ -57,12 +59,20 @@ export const fetchJupiterInstructions = async ({
 	outputMint,
 	amountRaw,
 	swapMode,
+	onlyDirectRoutes,
 	unwrapSol = true,
 }: ExecuteJupiterSwapParams): Promise<{
 	instructions: TransactionInstruction[]
 	ATLAccounts: AddressLookupTableAccount[]
 }> => {
-	const tx = await _fetchEncodedTx({ inputMint, outputMint, amountRaw, swapMode, unwrapSol })
+	const tx = await _fetchEncodedTx({
+		inputMint,
+		outputMint,
+		amountRaw,
+		swapMode,
+		unwrapSol,
+		onlyDirectRoutes,
+	})
 
 	if (!tx.message.addressTableLookups.length) {
 		return {
@@ -104,8 +114,16 @@ export const fetchAndSignJupiterTransaction = async ({
 	amountRaw,
 	swapMode,
 	unwrapSol = true,
+	onlyDirectRoutes,
 }: ExecuteJupiterSwapParams): Promise<BuiltTransactionData> => {
-	const tx = await _fetchEncodedTx({ inputMint, outputMint, amountRaw, swapMode, unwrapSol })
+	const tx = await _fetchEncodedTx({
+		inputMint,
+		outputMint,
+		amountRaw,
+		swapMode,
+		unwrapSol,
+		onlyDirectRoutes,
+	})
 	const { blockhash, lastValidBlockHeight } = await retryOnThrow(() =>
 		connection.getLatestBlockhash(),
 	)

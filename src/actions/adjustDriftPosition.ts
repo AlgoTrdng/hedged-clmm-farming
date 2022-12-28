@@ -11,6 +11,7 @@ import { fetchJupiterInstructions } from '../services/jupiter/transaction.js'
 import { fetchWhirlpoolData } from '../services/orca/getWhirlpoolData.js'
 import { loadALTAccount } from '../utils/loadALTAccount.js'
 import { DriftPosition, WhirlpoolPosition } from '../state.js'
+import { buildSwapIx } from '../services/orca/instructions/swap.js'
 
 type AdjustHedgePositionParams = {
 	driftPosition: DriftPosition
@@ -23,8 +24,7 @@ export const adjustDriftPosition = async ({
 	whirlpoolPositionData,
 	whirlpoolSqrtPrice,
 }: AdjustHedgePositionParams): Promise<DriftPosition> => {
-	const sqrtPrice =
-		whirlpoolSqrtPrice !== undefined ? whirlpoolSqrtPrice : (await fetchWhirlpoolData()).sqrtPrice
+	const sqrtPrice = whirlpoolSqrtPrice || (await fetchWhirlpoolData()).sqrtPrice
 	const ALTAccountPromise = loadALTAccount()
 
 	const { liquidity, tickLowerIndex, tickUpperIndex } = whirlpoolPositionData
@@ -60,6 +60,7 @@ export const adjustDriftPosition = async ({
 			unwrapSol: false,
 			swapMode: 'ExactIn',
 			amountRaw: tokenADiff,
+			onlyDirectRoutes: true,
 		})
 		instructions.push(borrowIx, ...swapIxs)
 		ALTAccounts.push(...swapATLAccounts)
@@ -68,20 +69,13 @@ export const adjustDriftPosition = async ({
 		const amount = Math.abs(tokenADiff)
 		adjustedDriftPosition.borrowAmount -= amount
 
-		const { instructions: swapIxs, ATLAccounts: swapATLAccounts } = await fetchJupiterInstructions({
-			inputMint: tokenB.mint,
-			outputMint: tokenA.mint,
-			unwrapSol: false,
-			swapMode: 'ExactOut',
-			amountRaw: amount,
-		})
+		const ix = await buildSwapIx({ outAmount: amount, aToB: false })
 		const repayIx = buildDriftDepositIx({
 			amountRaw: amount,
 			token: tokenA,
 			repay: true,
 		})
-		instructions.push(...swapIxs, repayIx)
-		ALTAccounts.push(...swapATLAccounts)
+		instructions.push(ix, repayIx)
 	}
 
 	if (!instructions.length) {

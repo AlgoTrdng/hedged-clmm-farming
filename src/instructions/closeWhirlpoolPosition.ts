@@ -9,7 +9,6 @@ import { WHIRLPOOL_ADDRESS } from '../config.js'
 import { ctx, wallet, tokenA, tokenB } from '../global.js'
 import { getTickArrays } from '../services/orca/helpers/getTickArrays.js'
 import { buildCloseWhirlpoolPositionIx } from '../services/orca/instructions/closePosition.js'
-import { buildCollectRewardsIxs } from '../services/orca/instructions/collectRewards.js'
 import { WhirlpoolPosition } from '../state.js'
 
 export type BuildCloseWhirlpoolPositionIxParams = {
@@ -55,11 +54,6 @@ export const buildCloseWhirlpoolPositionIxs = ({
 		collectFeesIxAccounts,
 	)
 
-	const collectRewardsIxs = buildCollectRewardsIxs({
-		whirlpoolPosition,
-		whirlpoolData,
-	})
-
 	const { instructions: decreaseLiquidityIx } = WhirlpoolIx.decreaseLiquidityIx(ctx.program, {
 		liquidityAmount: decreaseLiquidityQuote.liquidityAmount,
 		tokenMinA: decreaseLiquidityQuote.tokenMinA,
@@ -75,7 +69,6 @@ export const buildCloseWhirlpoolPositionIxs = ({
 		instructions: [
 			...updateFeesAndRewardsIxs,
 			...collectFeesIx,
-			...collectRewardsIxs,
 			...decreaseLiquidityIx,
 			...closePositionIx,
 		],

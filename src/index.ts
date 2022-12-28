@@ -7,7 +7,7 @@ import { buildAndSignTxFromInstructions } from 'solana-tx-utils'
 import { setTimeout } from 'node:timers/promises'
 
 import { fetchAndUpdateWhirlpoolData } from './services/orca/getWhirlpoolData.js'
-import { connection, wallet } from './global.js'
+import { connection, tokenA, wallet } from './global.js'
 import { USDC_POSITION_SIZE } from './config.js'
 import { openHedgedPosition } from './actions/openHedgedPosition.js'
 import {
@@ -33,8 +33,8 @@ await (async () => {
 	instructions.push(...setupDriftIxs)
 
 	// Initialize all ATAs
-	const accountsMintsToInitialize: PublicKey[] = []
-	const accountsAddressesToInitialize: PublicKey[] = []
+	const accountsMintsToInitialize = [tokenA.mint]
+	const accountsAddressesToInitialize = [tokenA.ATAddress]
 
 	whirlpoolData.value.rewardInfos.forEach(({ mint }) => {
 		if (
