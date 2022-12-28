@@ -8,6 +8,7 @@ import BN from 'bn.js'
 import { SLIPPAGE_TOLERANCE } from '../constants.js'
 import { tokenB } from '../global.js'
 import { getBoundariesTickIndexes } from '../services/orca/helpers/getBoundariesTickIndex.js'
+import { getTokenBWeight } from '../services/orca/helpers/getTokenBWeight.js'
 import { buildCreatePositionIx } from '../services/orca/instructions/createPosition.js'
 import { buildDepositLiquidityIx } from '../services/orca/instructions/depositLiquidity.js'
 import { buildInitTickArrayIx } from '../services/orca/instructions/initTickArray.js'
@@ -39,9 +40,15 @@ export const buildOpenWhirlpoolPositionIx = async ({
 		lowerBoundary: lowerBoundaryPrice,
 	})
 	const { tickLowerIndex, tickUpperIndex } = priceRangeTickIndexes
+	const tokenBWeight = getTokenBWeight({
+		sqrtPrice: whirlpoolData.sqrtPrice,
+		tickCurrentIndex: whirlpoolData.tickCurrentIndex,
+		upperTickIndex: tickUpperIndex,
+		lowerTickIndex: tickLowerIndex,
+	})
 	const liquidityInput = increaseLiquidityQuoteByInputTokenWithParams({
 		inputTokenMint: tokenB.mint,
-		inputTokenAmount: new BN(amountRaw * 0.5),
+		inputTokenAmount: new BN(amountRaw * tokenBWeight),
 		slippageTolerance: SLIPPAGE_TOLERANCE,
 		tickLowerIndex,
 		tickUpperIndex,
