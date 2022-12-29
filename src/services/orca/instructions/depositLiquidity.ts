@@ -1,7 +1,7 @@
 import { WhirlpoolData, IncreaseLiquidityInput, WhirlpoolIx } from '@orca-so/whirlpools-sdk'
 import { PublicKey, TransactionInstruction } from '@solana/web3.js'
 
-import { WHIRLPOOL_ADDRESS } from '../../../config.js'
+import { WHIRLPOOL_ADDRESS } from '../../../config/index.js'
 import { tokenA, tokenB, wallet, ctx } from '../../../global.js'
 import { getTickArrays } from '../helpers/getTickArrays.js'
 

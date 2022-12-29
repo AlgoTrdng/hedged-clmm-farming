@@ -1,7 +1,7 @@
 import { ParsableWhirlpool, WhirlpoolData } from '@orca-so/whirlpools-sdk'
 import { AccountInfo } from '@solana/web3.js'
 
-import { WHIRLPOOL_ADDRESS } from '../../config.js'
+import { WHIRLPOOL_ADDRESS } from '../../config/index.js'
 import { connection } from '../../global.js'
 import { retryOnThrow } from '../../utils/retryOnThrow.js'
 
@@ -15,6 +15,7 @@ export const fetchWhirlpoolData = async (): Promise<WhirlpoolData> => {
 }
 
 export const fetchAndUpdateWhirlpoolData = async () => {
+	console.log('Connecting to whirlpool')
 	const refreshTimeout = 1000 * 60 * 15
 	const whirlpoolData = {
 		value: await fetchWhirlpoolData(),

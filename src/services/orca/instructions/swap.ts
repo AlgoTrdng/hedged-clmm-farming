@@ -110,6 +110,7 @@ export const buildSwapIx = async ({
 	outAmount,
 	aToB = false,
 }: BuildSwapIxParams): Promise<TransactionInstruction> => {
+	console.log('Building orca swap ix')
 	const amountSpecifiedIsInput = false
 
 	const whirlpoolsData = await fetchWhirlpoolsData()

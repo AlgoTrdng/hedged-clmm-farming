@@ -13,7 +13,7 @@ import {
 	UPPER_BOUNDARY_PCT,
 	USDC_POSITION_SIZE,
 	WALLET_PRIVATE_KEY,
-} from './config.js'
+} from './config/index.js'
 import { SOL_MINT, USDC_MINT } from './constants.js'
 import { TokenInfo } from './types.js'
 

@@ -8,7 +8,7 @@ import { setTimeout } from 'node:timers/promises'
 
 import { fetchAndUpdateWhirlpoolData } from './services/orca/getWhirlpoolData.js'
 import { connection, tokenA, wallet } from './global.js'
-import { USDC_POSITION_SIZE } from './config.js'
+import { USDC_POSITION_SIZE } from './config/index.js'
 import { openHedgedPosition } from './actions/openHedgedPosition.js'
 import {
 	getBoundariesFromTickIndexes,

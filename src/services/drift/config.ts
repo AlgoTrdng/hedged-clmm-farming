@@ -31,6 +31,7 @@ export const DRIFT_SIGNER = getDriftSignerPublicKey(DRIFT_PROGRAM_ID)
 export const DRIFT_STATE = await getDriftStateAccountPublicKey(DRIFT_PROGRAM_ID)
 export const DRIFT_USER_STATS = getUserStatsAccountPublicKey(DRIFT_PROGRAM_ID, wallet.publicKey)
 
+console.log('Fetching drift data')
 const getDriftUserData = async () => {
 	const driftUserStatsAI = await retryOnThrow(() => connection.getAccountInfo(DRIFT_USER_STATS))
 

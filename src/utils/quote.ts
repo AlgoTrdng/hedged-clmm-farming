@@ -9,7 +9,7 @@ import {
 import { PublicKey } from '@solana/web3.js'
 import BN from 'bn.js'
 
-import { WHIRLPOOL_ADDRESS } from '../config.js'
+import { WHIRLPOOL_ADDRESS } from '../config/index.js'
 import { SLIPPAGE_TOLERANCE } from '../constants.js'
 import { connection, lowerBoundaryBps, tokenA, tokenB, upperBoundaryBps } from '../global.js'
 import { retryOnThrow } from './retryOnThrow.js'

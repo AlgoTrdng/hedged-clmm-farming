@@ -2,7 +2,7 @@ import { WhirlpoolData, WhirlpoolIx } from '@orca-so/whirlpools-sdk'
 import { getAssociatedTokenAddressSync } from '@solana/spl-token'
 import { TransactionInstruction } from '@solana/web3.js'
 
-import { WHIRLPOOL_ADDRESS } from '../../../config.js'
+import { WHIRLPOOL_ADDRESS } from '../../../config/index.js'
 import { wallet, ctx } from '../../../global.js'
 import { WhirlpoolPosition } from '../../../state.js'
 

@@ -5,6 +5,7 @@ export const retryOnThrow = async <T>(cb: () => Promise<T>, wait = 500): Promise
 		const res = await cb()
 		return res
 	} catch (error) {
+		console.log(error)
 		await setTimeout(wait)
 		return retryOnThrow(cb, wait)
 	}

@@ -6,7 +6,7 @@ import {
 	WhirlpoolData,
 } from '@orca-so/whirlpools-sdk'
 
-import { WHIRLPOOL_ADDRESS } from '../../../config.js'
+import { WHIRLPOOL_ADDRESS } from '../../../config/index.js'
 import { fetcher, ctx, wallet } from '../../../global.js'
 import { retryOnThrow } from '../../../utils/retryOnThrow.js'
 

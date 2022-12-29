@@ -48,7 +48,8 @@ const _fetchEncodedTx = async ({
 				})
 			).json()) as JupiterSwapResponse
 			return VersionedTransaction.deserialize(Buffer.from(res.swapTransaction, 'base64'))
-		} catch {
+		} catch (e) {
+			console.log(e)
 			await setTimeout(500)
 		}
 	}

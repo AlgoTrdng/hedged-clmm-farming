@@ -4,7 +4,7 @@ import {
 	WhirlpoolData,
 	DecreaseLiquidityQuote,
 } from '@orca-so/whirlpools-sdk'
-import { WHIRLPOOL_ADDRESS } from '../config.js'
+import { WHIRLPOOL_ADDRESS } from '../config/index.js'
 
 import { ctx, wallet, tokenA, tokenB } from '../global.js'
 import { getTickArrays } from '../services/orca/helpers/getTickArrays.js'
