@@ -43,7 +43,7 @@ export const adjustDriftPosition = async ({
 	const instructions: TransactionInstruction[] = []
 	const ALTAccounts: AddressLookupTableAccount[] = []
 
-	const adjustedDriftPosition: DriftPosition = driftPosition
+	const adjustedDriftPosition: DriftPosition = { ...driftPosition }
 
 	if (tokenADiff > 0) {
 		// Position tokenA is bigger than hedged tokenA, borrow diff
@@ -106,9 +106,6 @@ export const adjustDriftPosition = async ({
 			}
 			case 'BLOCK_HEIGHT_EXCEEDED':
 			case 'ERROR': {
-				if (res.error) {
-					console.log(res.error.error)
-				}
 				return adjustDriftPosition({
 					driftPosition,
 					whirlpoolPositionData,
