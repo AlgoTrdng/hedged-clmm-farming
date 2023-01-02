@@ -1,7 +1,7 @@
 module.exports = {
 	apps: [
 		{
-			name: 'orca-farming',
+			name: 'surf-farming',
 			script: 'dist/index.js',
 			error_file: './err.log',
 			out_file: './out.log',

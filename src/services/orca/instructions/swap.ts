@@ -127,35 +127,39 @@ export const buildSwapIx = async ({
 		const amount = new BN(outAmount)
 		const sqrtPriceLimit = SwapUtils.getDefaultSqrtPriceLimit(aToB)
 		const otherAmountThreshold = SwapUtils.getDefaultOtherAmountThreshold(amountSpecifiedIsInput)
-		const quote = swapQuoteWithParams(
-			{
-				tokenAmount: amount,
-				otherAmountThreshold,
-				sqrtPriceLimit,
-				tickArrays,
-				whirlpoolData,
-				amountSpecifiedIsInput,
-				aToB,
-			},
-			SLIPPAGE_TOLERANCE,
-		)
-		const inAmount = quote.estimatedAmountIn.toNumber()
-		if (!bestSwapParams || bestSwapParams.inAmount > inAmount) {
-			bestSwapParams = {
-				inAmount,
-				amount,
-				aToB,
-				amountSpecifiedIsInput,
-				sqrtPriceLimit,
-				otherAmountThreshold,
-				whirlpool: pk,
-				tokenVaultA: whirlpoolData.tokenVaultA,
-				tokenVaultB: whirlpoolData.tokenVaultB,
-				oracle: whirlpoolData.oracle,
-				tickArray0: tickArrays[0].address,
-				tickArray1: tickArrays[1].address,
-				tickArray2: tickArrays[2].address,
+		try {
+			const quote = swapQuoteWithParams(
+				{
+					tokenAmount: amount,
+					otherAmountThreshold,
+					sqrtPriceLimit,
+					tickArrays,
+					whirlpoolData,
+					amountSpecifiedIsInput,
+					aToB,
+				},
+				SLIPPAGE_TOLERANCE,
+			)
+			const inAmount = quote.estimatedAmountIn.toNumber()
+			if (!bestSwapParams || bestSwapParams.inAmount > inAmount) {
+				bestSwapParams = {
+					inAmount,
+					amount,
+					aToB,
+					amountSpecifiedIsInput,
+					sqrtPriceLimit,
+					otherAmountThreshold,
+					whirlpool: pk,
+					tokenVaultA: whirlpoolData.tokenVaultA,
+					tokenVaultB: whirlpoolData.tokenVaultB,
+					oracle: whirlpoolData.oracle,
+					tickArray0: tickArrays[0].address,
+					tickArray1: tickArrays[1].address,
+					tickArray2: tickArrays[2].address,
+				}
 			}
+		} catch (e) {
+			console.error(e)
 		}
 	})
 
