@@ -15,12 +15,12 @@ import { BN } from 'bn.js'
 import { setTimeout } from 'node:timers/promises'
 
 import { SLIPPAGE_TOLERANCE } from '../../../constants.js'
-import { connection, ctx, tokenA, tokenB, wallet } from '../../../global.js'
+import { connection, ctx, tokenA, tokenB, surfWallet } from '../../../global.js'
 import { retryOnThrow } from '../../../utils/retryOnThrow.js'
 
 const whirlpoolsAddresses = [
 	// tickSpacing: 1
-	new PublicKey('83v8iPyZihDEjDdY8RdZddyZNyUtXngz69Lgo9Kt5d6d'),
+	// new PublicKey('83v8iPyZihDEjDdY8RdZddyZNyUtXngz69Lgo9Kt5d6d'),
 	// tickSpacing: 8
 	new PublicKey('7qbRF6YsyGuLUVs6Y1q64bdVrfe4ZcUUz1JRdoVNUJnm'),
 	// tickSpacing: 64
@@ -172,7 +172,7 @@ export const buildSwapIx = async ({
 		...(bestSwapParams as BestSwapParams),
 		tokenOwnerAccountA: tokenA.ATAddress,
 		tokenOwnerAccountB: tokenB.ATAddress,
-		tokenAuthority: wallet.publicKey,
+		tokenAuthority: surfWallet.publicKey,
 	})
 
 	return instructions[0]

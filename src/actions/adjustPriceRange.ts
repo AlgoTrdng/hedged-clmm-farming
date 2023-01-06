@@ -4,7 +4,7 @@ import { buildAndSignTxFromInstructions, sendTransaction } from 'solana-tx-utils
 import { setTimeout } from 'node:timers/promises'
 
 import { SLIPPAGE_TOLERANCE } from '../constants.js'
-import { connection, tokenA, tokenB, wallet } from '../global.js'
+import { connection, tokenA, tokenB, surfWallet } from '../global.js'
 import { buildCloseWhirlpoolPositionIxs } from '../instructions/closeWhirlpoolPosition.js'
 import { buildOpenWhirlpoolPositionIx } from '../instructions/openWhirlpoolPosition.js'
 import { fetchBestRoute } from '../services/jupiter/fetchBestRoute.js'
@@ -93,7 +93,7 @@ export const adjustPriceRange = async ({
 	const ALTAccount = await ALTAccountPromise
 	const txData = await buildAndSignTxFromInstructions(
 		{
-			signers: [wallet, ...additionalSigners],
+			signers: [surfWallet, ...additionalSigners],
 			instructions: [
 				...closeWhirlpoolPositionIxs,
 				...swapInstructions,

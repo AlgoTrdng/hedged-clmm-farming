@@ -3,7 +3,7 @@ import { getAssociatedTokenAddressSync } from '@solana/spl-token'
 import { Keypair } from '@solana/web3.js'
 
 import { WHIRLPOOL_ADDRESS } from '../../../config/index.js'
-import { wallet, ctx } from '../../../global.js'
+import { surfWallet, ctx } from '../../../global.js'
 
 type BuildCreatePositionIxParams = {
 	tickLowerIndex: number
@@ -22,12 +22,12 @@ export const buildCreatePositionIx = ({
 
 	const positionATAddress = getAssociatedTokenAddressSync(
 		positionMintKeypair.publicKey,
-		wallet.publicKey,
+		surfWallet.publicKey,
 	)
 
 	const { instructions } = WhirlpoolIx.openPositionIx(ctx.program, {
-		funder: wallet.publicKey,
-		owner: wallet.publicKey,
+		funder: surfWallet.publicKey,
+		owner: surfWallet.publicKey,
 		positionPda: positionPDAddress,
 		positionMintAddress: positionMintKeypair.publicKey,
 		positionTokenAccount: positionATAddress,

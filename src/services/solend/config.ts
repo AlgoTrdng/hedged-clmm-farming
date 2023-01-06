@@ -2,7 +2,7 @@ import fetch from 'node-fetch'
 import { ConfigType, SOLEND_PRODUCTION_PROGRAM_ID } from '@solendprotocol/solend-sdk'
 import { PublicKey } from '@solana/web3.js'
 
-import { tokenA, tokenB, wallet } from '../../global.js'
+import { tokenA, tokenB, userWallet } from '../../global.js'
 import { retryOnThrow } from '../../utils/retryOnThrow.js'
 import { getAssociatedTokenAddressSync } from '@solana/spl-token'
 
@@ -22,7 +22,7 @@ export const SOLEND_POOL_ADDRESS = new PublicKey(pool.address)
 export const SOLEND_POOL_AUTHORITY_ADDRESS = new PublicKey(pool.authorityAddress)
 export const OBLIGATION_ADDRESS_SEED = pool.address.slice(0, 32)
 export const OBLIGATION_ADDRESS = await PublicKey.createWithSeed(
-	wallet.publicKey,
+	userWallet.publicKey,
 	OBLIGATION_ADDRESS_SEED,
 	SOLEND_PRODUCTION_PROGRAM_ID,
 )
@@ -35,7 +35,7 @@ const parseTokenReserveData = (mint: PublicKey) => {
 		throw Error(`Could not find reserve with mint: ${mint.toString()}`)
 	}
 	const collateralMintAddress = new PublicKey(reserve.collateralMintAddress)
-	const collateralATAddress = getAssociatedTokenAddressSync(collateralMintAddress, wallet.publicKey)
+	const collateralATAddress = getAssociatedTokenAddressSync(collateralMintAddress, userWallet.publicKey)
 	return {
 		pythOracle: new PublicKey(reserve.pythOracle),
 		switchboardOracle: new PublicKey(reserve.switchboardOracle),

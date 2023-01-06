@@ -4,7 +4,7 @@ import { buildAndSignTxFromInstructions, sendTransaction } from 'solana-tx-utils
 import { setTimeout } from 'node:timers/promises'
 import BN from 'bn.js'
 
-import { connection, tokenA, tokenB, wallet } from '../global.js'
+import { connection, surfWallet, tokenA, tokenB } from '../global.js'
 import { buildDriftDepositIx } from '../services/drift/instructions/deposit.js'
 import { buildDriftWithdrawIx } from '../services/drift/instructions/withdraw.js'
 import { fetchJupiterInstructions } from '../services/jupiter/transaction.js'
@@ -86,7 +86,7 @@ export const adjustDriftPosition = async ({
 	const txData = await buildAndSignTxFromInstructions(
 		{
 			instructions,
-			signers: [wallet],
+			signers: [surfWallet],
 			addressLookupTables: [ALTAccount, ...ALTAccounts],
 		},
 		connection,

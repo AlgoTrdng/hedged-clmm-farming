@@ -1,26 +1,25 @@
 import { SYSVAR_RENT_PUBKEY, SystemProgram, TransactionInstruction } from '@solana/web3.js'
 
-import { wallet } from '../../../global.js'
-import {
-	driftProgram,
-	DRIFT_STATE,
-	DRIFT_USER,
-	DRIFT_USER_ACCOUNT_ID,
-	DRIFT_USER_STATS,
-	DRIFT_USER_STATS_INITIALIZED,
-} from '../config.js'
+import { connection, driftUser, driftUserStats, surfWallet, userWallet } from '../../../global.js'
+import { retryOnThrow } from '../../../utils/retryOnThrow.js'
+import { driftProgram, DRIFT_STATE } from '../config.js'
 
-export const buildDriftInitializeUserIx = () => {
+export const buildDriftInitializeUserIx = async () => {
 	const ixs: TransactionInstruction[] = []
+	const name = Buffer.from('surf' + ' '.repeat(28), 'utf-8')
 
-	if (!DRIFT_USER_STATS_INITIALIZED) {
+	const [driftUserStatsAccount, driftUserAccount] = await retryOnThrow(() =>
+		connection.getMultipleAccountsInfo([driftUserStats, driftUser]),
+	)
+
+	if (!driftUserStatsAccount?.data) {
 		ixs.push(
 			driftProgram.instruction.initializeUserStats({
 				accounts: {
-					userStats: DRIFT_USER_STATS,
+					userStats: driftUserStats,
 					state: DRIFT_STATE,
-					authority: wallet.publicKey,
-					payer: wallet.publicKey,
+					authority: surfWallet.publicKey,
+					payer: userWallet.publicKey,
 					rent: SYSVAR_RENT_PUBKEY,
 					systemProgram: SystemProgram.programId,
 				},
@@ -28,20 +27,21 @@ export const buildDriftInitializeUserIx = () => {
 		)
 	}
 
-	const name = Buffer.from('surf' + ' '.repeat(28), 'utf-8')
-	ixs.push(
-		driftProgram.instruction.initializeUser(DRIFT_USER_ACCOUNT_ID, Array(...name), {
-			accounts: {
-				user: DRIFT_USER,
-				userStats: DRIFT_USER_STATS,
-				state: DRIFT_STATE,
-				authority: wallet.publicKey,
-				payer: wallet.publicKey,
-				rent: SYSVAR_RENT_PUBKEY,
-				systemProgram: SystemProgram.programId,
-			},
-		}),
-	)
+	if (!driftUserAccount?.data) {
+		ixs.push(
+			driftProgram.instruction.initializeUser(0, Array(...name), {
+				accounts: {
+					user: driftUser,
+					userStats: driftUserStats,
+					state: DRIFT_STATE,
+					authority: surfWallet.publicKey,
+					payer: userWallet.publicKey,
+					rent: SYSVAR_RENT_PUBKEY,
+					systemProgram: SystemProgram.programId,
+				},
+			}),
+		)
+	}
 
 	return ixs
 }

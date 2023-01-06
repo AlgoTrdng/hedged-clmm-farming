@@ -1,7 +1,7 @@
 import { sendTransaction, buildAndSignTxFromInstructions } from 'solana-tx-utils'
 import { ORCA_WHIRLPOOL_PROGRAM_ID, WhirlpoolData } from '@orca-so/whirlpools-sdk'
 
-import { connection, tokenA, tokenB, wallet } from '../global.js'
+import { connection, tokenA, tokenB, surfWallet } from '../global.js'
 import { loadALTAccount } from '../utils/loadALTAccount.js'
 import { buildDriftDepositIx } from '../services/drift/instructions/deposit.js'
 import { buildDriftWithdrawIx } from '../services/drift/instructions/withdraw.js'
@@ -28,8 +28,9 @@ export const openHedgedPosition = async ({
 	lowerBoundaryPrice,
 	whirlpoolData,
 }: OpenHedgedPositionParams): Promise<HedgedPosition> => {
-	const orcaAmount = Math.floor(usdcAmountRaw * 0.5)
-	const collateralAmount = usdcAmountRaw - orcaAmount
+	const safeInputAmountRaw = usdcAmountRaw - 500_000
+	const orcaAmount = Math.floor(safeInputAmountRaw * 0.5)
+	const collateralAmount = safeInputAmountRaw - orcaAmount
 
 	// Deposit to Orca
 	const {
@@ -62,8 +63,8 @@ export const openHedgedPosition = async ({
 	const ALTAccount = await loadALTAccount()
 	const tx = await buildAndSignTxFromInstructions(
 		{
-			payerKey: wallet.publicKey,
-			signers: [wallet, ...additionalSigners],
+			payerKey: surfWallet.publicKey,
+			signers: [surfWallet, ...additionalSigners],
 			addressLookupTables: [ALTAccount],
 			instructions: [
 				prepareDepositAmountIx,
@@ -94,7 +95,8 @@ export const openHedgedPosition = async ({
 		if (
 			depositLiquidityAndBorrowRes.status === 'BLOCK_HEIGHT_EXCEEDED' ||
 			(depositLiquidityAndBorrowRes.error?.programId?.equals(ORCA_WHIRLPOOL_PROGRAM_ID) &&
-				depositLiquidityAndBorrowRes.error.error === 0x1781)
+				(depositLiquidityAndBorrowRes.error.error === 0x1781 ||
+					depositLiquidityAndBorrowRes.error.error === 0x1))
 		) {
 			return openHedgedPosition({
 				usdcAmountRaw,

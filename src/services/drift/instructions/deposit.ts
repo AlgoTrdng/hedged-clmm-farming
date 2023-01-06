@@ -1,9 +1,9 @@
 import { TOKEN_PROGRAM_ID } from '@solana/spl-token'
 import BN from 'bn.js'
 
-import { wallet } from '../../../global.js'
+import { driftUser, driftUserStats, surfWallet } from '../../../global.js'
 import { TokenInfo } from '../../../types.js'
-import { driftProgram, DRIFT_STATE, DRIFT_USER, DRIFT_USER_STATS } from '../config.js'
+import { driftProgram, DRIFT_STATE } from '../config.js'
 import { buildAdditionalAccounts, mapTokenToMarket } from './utils.js'
 
 type BuildDriftDepositIxParams = {
@@ -19,9 +19,9 @@ export const buildDriftDepositIx = ({ amountRaw, token, repay }: BuildDriftDepos
 	const ix = driftProgram.instruction.deposit(marketIndex, new BN(amountRaw), repay, {
 		accounts: {
 			state: DRIFT_STATE,
-			user: DRIFT_USER,
-			userStats: DRIFT_USER_STATS,
-			authority: wallet.publicKey,
+			user: driftUser,
+			userStats: driftUserStats,
+			authority: surfWallet.publicKey,
 			spotMarketVault: marketVault,
 			userTokenAccount: token.ATAddress,
 			tokenProgram: TOKEN_PROGRAM_ID,

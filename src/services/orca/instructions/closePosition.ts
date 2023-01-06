@@ -1,6 +1,6 @@
 import { WhirlpoolIx } from '@orca-so/whirlpools-sdk'
 
-import { ctx, wallet } from '../../../global.js'
+import { ctx, surfWallet } from '../../../global.js'
 import { WhirlpoolPosition } from '../../../state.js'
 
 export const buildCloseWhirlpoolPositionIx = ({
@@ -9,8 +9,8 @@ export const buildCloseWhirlpoolPositionIx = ({
 	positionMint,
 }: Pick<WhirlpoolPosition, 'ATAddress' | 'PDAddress' | 'positionMint'>) => {
 	const { instructions: closePositionIx } = WhirlpoolIx.closePositionIx(ctx.program, {
-		positionAuthority: wallet.publicKey,
-		receiver: wallet.publicKey,
+		positionAuthority: surfWallet.publicKey,
+		receiver: surfWallet.publicKey,
 		positionTokenAccount: ATAddress,
 		position: PDAddress,
 		positionMint: positionMint,

@@ -8,7 +8,7 @@ import {
 } from '@solendprotocol/solend-sdk'
 import BN from 'bn.js'
 
-import { connection, tokenB, wallet } from '../../../global.js'
+import { connection, tokenB, userWallet } from '../../../global.js'
 import { retryOnThrow } from '../../../utils/retryOnThrow.js'
 import {
 	OBLIGATION_ADDRESS,
@@ -31,9 +31,9 @@ export const buildDepositUsdcToSolendIx = async (amountRaw: number | BN) => {
 		)
 		instructions.push(
 			SystemProgram.createAccountWithSeed({
-				fromPubkey: wallet.publicKey,
+				fromPubkey: userWallet.publicKey,
 				newAccountPubkey: OBLIGATION_ADDRESS,
-				basePubkey: wallet.publicKey,
+				basePubkey: userWallet.publicKey,
 				seed: OBLIGATION_ADDRESS_SEED,
 				lamports: obligationAccountRent,
 				space: OBLIGATION_SIZE,
@@ -42,7 +42,7 @@ export const buildDepositUsdcToSolendIx = async (amountRaw: number | BN) => {
 			initObligationInstruction(
 				OBLIGATION_ADDRESS,
 				SOLEND_POOL_ADDRESS,
-				wallet.publicKey,
+				userWallet.publicKey,
 				SOLEND_PRODUCTION_PROGRAM_ID,
 			),
 		)
@@ -51,9 +51,9 @@ export const buildDepositUsdcToSolendIx = async (amountRaw: number | BN) => {
 	if (!collateralATAccountInfo) {
 		instructions.push(
 			createAssociatedTokenAccountInstruction(
-				wallet.publicKey,
+				userWallet.publicKey,
 				tokenBReserve.collateralATAddress,
-				wallet.publicKey,
+				userWallet.publicKey,
 				tokenBReserve.collateralMintAddress,
 			),
 		)
@@ -71,10 +71,10 @@ export const buildDepositUsdcToSolendIx = async (amountRaw: number | BN) => {
 			SOLEND_POOL_AUTHORITY_ADDRESS,
 			tokenBReserve.collateralSupplyAddress,
 			OBLIGATION_ADDRESS,
-			wallet.publicKey,
+			userWallet.publicKey,
 			tokenBReserve.pythOracle,
 			tokenBReserve.switchboardOracle,
-			wallet.publicKey,
+			userWallet.publicKey,
 			SOLEND_PRODUCTION_PROGRAM_ID,
 		),
 	)

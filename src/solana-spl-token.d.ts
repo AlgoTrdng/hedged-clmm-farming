@@ -44,4 +44,13 @@ declare module '@solana/spl-token' {
 		account: PublicKey,
 		programId?: PublicKey,
 	): TransactionInstruction
+
+	export function createTransferInstruction(
+		source: PublicKey,
+		destination: PublicKey,
+		owner: PublicKey,
+		amount: number | bigint,
+		multiSigners?: Signer[],
+		programId?: PublicKey,
+	): TransactionInstruction
 }

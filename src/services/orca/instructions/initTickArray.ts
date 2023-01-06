@@ -7,7 +7,7 @@ import {
 } from '@orca-so/whirlpools-sdk'
 
 import { WHIRLPOOL_ADDRESS } from '../../../config/index.js'
-import { fetcher, ctx, wallet } from '../../../global.js'
+import { fetcher, ctx, surfWallet } from '../../../global.js'
 import { retryOnThrow } from '../../../utils/retryOnThrow.js'
 
 export const buildInitTickArrayIx = async (whirlpoolData: WhirlpoolData) => {
@@ -25,7 +25,7 @@ export const buildInitTickArrayIx = async (whirlpoolData: WhirlpoolData) => {
 			startTick,
 			tickArrayPda,
 			whirlpool: WHIRLPOOL_ADDRESS,
-			funder: wallet.publicKey,
+			funder: surfWallet.publicKey,
 		})
 		return ix.instructions
 	}

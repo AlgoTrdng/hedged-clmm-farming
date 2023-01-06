@@ -2,7 +2,7 @@ import { WhirlpoolData, IncreaseLiquidityInput, WhirlpoolIx } from '@orca-so/whi
 import { PublicKey, TransactionInstruction } from '@solana/web3.js'
 
 import { WHIRLPOOL_ADDRESS } from '../../../config/index.js'
-import { tokenA, tokenB, wallet, ctx } from '../../../global.js'
+import { tokenA, tokenB, surfWallet, ctx } from '../../../global.js'
 import { getTickArrays } from '../helpers/getTickArrays.js'
 
 type BuildDepositLiquidityIxParams = {
@@ -35,7 +35,7 @@ export const buildDepositLiquidityIx = ({
 		tokenMaxA: liquidityInput.tokenMaxA,
 		tokenMaxB: liquidityInput.tokenMaxB,
 		whirlpool: WHIRLPOOL_ADDRESS,
-		positionAuthority: wallet.publicKey,
+		positionAuthority: surfWallet.publicKey,
 		position: positionPDAddress,
 		positionTokenAccount: positionATAddress,
 		tokenOwnerAccountA: tokenA.ATAddress,

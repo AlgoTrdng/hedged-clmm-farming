@@ -6,7 +6,7 @@ import {
 } from '@orca-so/whirlpools-sdk'
 import { WHIRLPOOL_ADDRESS } from '../config/index.js'
 
-import { ctx, wallet, tokenA, tokenB } from '../global.js'
+import { ctx, surfWallet, tokenA, tokenB } from '../global.js'
 import { getTickArrays } from '../services/orca/helpers/getTickArrays.js'
 import { buildCloseWhirlpoolPositionIx } from '../services/orca/instructions/closePosition.js'
 import { WhirlpoolPosition } from '../state.js'
@@ -40,7 +40,7 @@ export const buildCloseWhirlpoolPositionIxs = ({
 
 	const collectFeesIxAccounts: CollectFeesParams = {
 		whirlpool: WHIRLPOOL_ADDRESS,
-		positionAuthority: wallet.publicKey,
+		positionAuthority: surfWallet.publicKey,
 		position: whirlpoolPosition.PDAddress,
 		positionTokenAccount: whirlpoolPosition.ATAddress,
 		tokenOwnerAccountA: tokenA.ATAddress,

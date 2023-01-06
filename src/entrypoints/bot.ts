@@ -1,16 +1,12 @@
-import {
-	getAssociatedTokenAddressSync,
-	createAssociatedTokenAccountInstruction,
-} from '@solana/spl-token'
-import { TransactionInstruction, PublicKey } from '@solana/web3.js'
 import { buildAndSignTxFromInstructions } from 'solana-tx-utils'
 import { setTimeout } from 'node:timers/promises'
+import { ComputeBudgetProgram } from '@solana/web3.js'
 
 import { adjustDriftPosition } from '../actions/adjustDriftPosition.js'
 import { adjustPriceRange } from '../actions/adjustPriceRange.js'
 import { openHedgedPosition } from '../actions/openHedgedPosition.js'
 import { USDC_POSITION_SIZE } from '../config/index.js'
-import { tokenA, wallet, connection } from '../global.js'
+import { userWallet, connection, surfWallet } from '../global.js'
 import { buildDriftInitializeUserIx } from '../services/drift/instructions/initializeUser.js'
 import { fetchAndUpdateWhirlpoolData } from '../services/orca/getWhirlpoolData.js'
 import { isPriceInRange } from '../services/orca/helpers/isPriceInRange.js'
@@ -21,61 +17,40 @@ import {
 } from '../services/orca/helpers/priceHelpers.js'
 import { state } from '../state.js'
 import { forceSendTx } from '../utils/forceSendTx.js'
-import { retryOnThrow } from '../utils/retryOnThrow.js'
+import { buildCreateATAccountsIxs } from '../services/wallet/createATAccounts.js'
+import { buildTransferTokensIxs } from '../services/wallet/transferTokens.js'
 
 const whirlpoolData = await fetchAndUpdateWhirlpoolData()
 
 /* ---- SETUP ---- */
 await (async () => {
-	const instructions: TransactionInstruction[] = []
+	// Initialize all ATAs, transfer tokens to surf wallet
+	const initializeATAccountsIxs = await buildCreateATAccountsIxs(whirlpoolData.value.rewardInfos)
+	const transferTokensIxs = buildTransferTokensIxs()
+	const setupDriftIxs = await buildDriftInitializeUserIx()
 
-	const setupDriftIxs = buildDriftInitializeUserIx()
-	instructions.push(...setupDriftIxs)
+	const instructions = [
+		ComputeBudgetProgram.setComputeUnitLimit({ units: 150000 }),
+		...initializeATAccountsIxs,
+		...transferTokensIxs,
+	]
+	const signers = [userWallet]
 
-	// Initialize all ATAs
-	const accountsMintsToInitialize = [tokenA.mint]
-	const accountsAddressesToInitialize = [tokenA.ATAddress]
-
-	whirlpoolData.value.rewardInfos.forEach(({ mint }) => {
-		if (
-			mint.equals(PublicKey.default) ||
-			accountsMintsToInitialize.findIndex((_mint) => _mint.equals(mint)) > 0
-		) {
-			return
-		}
-		const ATAddress = getAssociatedTokenAddressSync(mint, wallet.publicKey)
-		accountsMintsToInitialize.push(mint)
-		accountsAddressesToInitialize.push(ATAddress)
-	})
-
-	const ATAccountsInfo = await retryOnThrow(() =>
-		connection.getMultipleAccountsInfo(accountsAddressesToInitialize),
-	)
-	ATAccountsInfo.forEach((ai, i) => {
-		if (!ai?.data) {
-			instructions.push(
-				createAssociatedTokenAccountInstruction(
-					wallet.publicKey,
-					accountsAddressesToInitialize[i],
-					wallet.publicKey,
-					accountsMintsToInitialize[i],
-				),
-			)
-		}
-	})
-
-	if (instructions.length) {
-		console.log('Creating accounts')
-		await forceSendTx(() =>
-			buildAndSignTxFromInstructions(
-				{
-					signers: [wallet],
-					instructions,
-				},
-				connection,
-			),
-		)
+	if (setupDriftIxs.length) {
+		instructions.push(...setupDriftIxs)
+		signers.push(surfWallet)
 	}
+
+	console.log('Creating Surf wallet, associated accounts, transferring tokens')
+	await forceSendTx(() =>
+		buildAndSignTxFromInstructions(
+			{
+				signers,
+				instructions,
+			},
+			connection,
+		),
+	)
 })()
 
 /* ---- INIT ----

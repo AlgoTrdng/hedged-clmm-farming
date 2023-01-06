@@ -8,7 +8,7 @@
 	"scripts": {
 		"build": "rm -rf dist && tsc",
 		"build:w": "rm -rf dist && tsc -w",
-		"start": "node dist/index.js",
+		"start": "node dist/entrypoints/bot.js",
 		"format": "prettier . --write",
 		"pm2:prod": "rm -rf dist && npm run build && pm2 start pm2.config.cjs"
 	},

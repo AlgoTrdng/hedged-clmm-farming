@@ -8,7 +8,7 @@ import { BuiltTransactionData } from 'solana-tx-utils'
 import fetch from 'node-fetch'
 import { setTimeout } from 'node:timers/promises'
 
-import { wallet, connection } from '../../global.js'
+import { surfWallet, connection } from '../../global.js'
 import { retryOnThrow } from '../../utils/retryOnThrow.js'
 import { ExecuteJupiterSwapParams, JupiterSwapResponse } from './types.js'
 import { fetchBestRoute } from './fetchBestRoute.js'
@@ -42,7 +42,7 @@ const _fetchEncodedTx = async ({
 					},
 					body: JSON.stringify({
 						route: bestRoute,
-						userPublicKey: wallet.publicKey.toString(),
+						userPublicKey: surfWallet.publicKey.toString(),
 						wrapUnwrapSOL: unwrapSol,
 					}),
 				})
@@ -129,7 +129,7 @@ export const fetchAndSignJupiterTransaction = async ({
 		connection.getLatestBlockhash(),
 	)
 	tx.message.recentBlockhash = blockhash
-	tx.sign([wallet])
+	tx.sign([surfWallet])
 	return {
 		transaction: tx,
 		lastValidBlockHeight,

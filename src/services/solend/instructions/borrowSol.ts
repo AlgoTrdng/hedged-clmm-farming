@@ -7,7 +7,7 @@ import {
 } from '@solendprotocol/solend-sdk'
 import BN from 'bn.js'
 
-import { tokenA, wallet } from '../../../global.js'
+import { tokenA, userWallet } from '../../../global.js'
 import {
 	OBLIGATION_ADDRESS,
 	SOLEND_POOL_ADDRESS,
@@ -46,7 +46,7 @@ export const buildBorrowSolFromSolendIx = (amountRaw: number | BN) => {
 			OBLIGATION_ADDRESS,
 			SOLEND_POOL_ADDRESS,
 			SOLEND_POOL_AUTHORITY_ADDRESS,
-			wallet.publicKey,
+			userWallet.publicKey,
 			SOLEND_PRODUCTION_PROGRAM_ID,
 		),
 	)

@@ -5,7 +5,7 @@ const config = await loadConfig()
 const wallet = await loadWallet(envConfig.ANCHOR_WALLET)
 
 export const WALLET_PRIVATE_KEY = wallet
-export const { ANCHOR_PROVIDER_URL: RPC_URL, DB_PATH } = envConfig
+export const { ANCHOR_PROVIDER_URL: RPC_URL, SURF_WALLET_CACHE } = envConfig
 export const {
 	whirlpoolAddress: WHIRLPOOL_ADDRESS,
 	upperBoundaryPct: UPPER_BOUNDARY_PCT,
