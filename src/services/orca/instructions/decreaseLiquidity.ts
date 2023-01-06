@@ -8,7 +8,7 @@ import {
 import { PublicKey } from '@solana/web3.js'
 
 import { SLIPPAGE_TOLERANCE } from '../../../constants.js'
-import { ctx } from '../../../global.js'
+import { whirlpoolProgram } from '../config.js'
 
 type BuildDecreaseLiquidityIxParams = {
 	whirlpoolData: WhirlpoolData
@@ -33,7 +33,7 @@ export const buildDecreaseLiquidityIx = async ({
 		tickLowerIndex: position.tickLowerIndex,
 		tickUpperIndex: position.tickUpperIndex,
 	})
-	const { instructions: decreaseLiquidityIx } = WhirlpoolIx.decreaseLiquidityIx(ctx.program, {
+	const { instructions: decreaseLiquidityIx } = WhirlpoolIx.decreaseLiquidityIx(whirlpoolProgram, {
 		liquidityAmount: decreaseLiquidityQuote.liquidityAmount,
 		tokenMinA: decreaseLiquidityQuote.tokenMinA,
 		tokenMinB: decreaseLiquidityQuote.tokenMinB,

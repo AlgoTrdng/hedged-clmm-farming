@@ -1,8 +1,3 @@
-import {
-	AccountFetcher,
-	ORCA_WHIRLPOOL_PROGRAM_ID,
-	WhirlpoolContext,
-} from '@orca-so/whirlpools-sdk'
 import { AnchorProvider } from '@project-serum/anchor'
 import { Connection, Keypair } from '@solana/web3.js'
 
@@ -19,13 +14,16 @@ import { TokenInfo } from './types.js'
 
 export const connection = new Connection(RPC_URL, 'confirmed')
 
-export const fetcher = new AccountFetcher(connection)
-
 export const userWallet = Keypair.fromSecretKey(WALLET_PRIVATE_KEY)
 export const provider = AnchorProvider.env()
-export const ctx = WhirlpoolContext.withProvider(provider, ORCA_WHIRLPOOL_PROGRAM_ID)
 
-export const { surfWallet, tokenA: tokenAATAccount, tokenB: tokenBATAccount, driftUser, driftUserStats } = await getOrCreateSurfWallet()
+export const {
+	surfWallet,
+	tokenA: tokenAATAccount,
+	tokenB: tokenBATAccount,
+	driftUser,
+	driftUserStats,
+} = await getOrCreateSurfWallet()
 
 export const tokenA: TokenInfo = {
 	mint: SOL_MINT,

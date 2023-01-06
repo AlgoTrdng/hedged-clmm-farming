@@ -8,11 +8,11 @@ import {
 	SpotMarketAccount,
 } from '@drift-labs/sdk'
 import { PublicKey } from '@solana/web3.js'
+import { Program } from '@project-serum/anchor'
 
 import { IDL } from './idl.js'
 import { connection, surfWallet, tokenA, tokenB } from '../../global.js'
 import { retryOnThrow } from '../../utils/retryOnThrow.js'
-import { Program } from '@project-serum/anchor'
 
 export const DRIFT_PROGRAM_ID = new PublicKey(configs['mainnet-beta'].DRIFT_PROGRAM_ID)
 

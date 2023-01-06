@@ -14,13 +14,13 @@ export const buildTransferTokensIxs = () => {
 			lamports: 50_000_000,
 			toPubkey: surfWallet.publicKey,
 		}),
-    createTransferInstruction(
-      userTokenBATAccount,
-      tokenB.ATAddress,
-      userWallet.publicKey,
-      usdcPositionSizeRaw,
-    ),
+		createTransferInstruction(
+			userTokenBATAccount,
+			tokenB.ATAddress,
+			userWallet.publicKey,
+			usdcPositionSizeRaw,
+		),
 	)
 
-  return ixs
+	return ixs
 }

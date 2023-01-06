@@ -3,8 +3,9 @@ import { getAssociatedTokenAddressSync } from '@solana/spl-token'
 import { TransactionInstruction } from '@solana/web3.js'
 
 import { WHIRLPOOL_ADDRESS } from '../../../config/index.js'
-import { surfWallet, ctx } from '../../../global.js'
+import { surfWallet } from '../../../global.js'
 import { WhirlpoolPosition } from '../../../state.js'
+import { whirlpoolProgram } from '../config.js'
 
 type BuildCollectRewardsParams = {
 	whirlpoolPosition: Pick<WhirlpoolPosition, 'ATAddress' | 'PDAddress'>
@@ -19,7 +20,7 @@ export const buildCollectRewardsIxs = ({
 
 	whirlpoolData.rewardInfos.forEach(({ vault, mint }, i) => {
 		const ATAddress = getAssociatedTokenAddressSync(mint, surfWallet.publicKey)
-		const { instructions: collectRewardIxs } = WhirlpoolIx.collectRewardIx(ctx.program, {
+		const { instructions: collectRewardIxs } = WhirlpoolIx.collectRewardIx(whirlpoolProgram, {
 			whirlpool: WHIRLPOOL_ADDRESS,
 			positionAuthority: surfWallet.publicKey,
 			position: whirlpoolPosition.PDAddress,

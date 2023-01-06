@@ -41,5 +41,5 @@ export const buildCreateATAccountsIxs = async (whirlpoolRewards: WhirlpoolReward
 		}
 	})
 
-  return ixs
+	return ixs
 }

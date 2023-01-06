@@ -15,11 +15,13 @@ import { BN } from 'bn.js'
 import { setTimeout } from 'node:timers/promises'
 
 import { SLIPPAGE_TOLERANCE } from '../../../constants.js'
-import { connection, ctx, tokenA, tokenB, surfWallet } from '../../../global.js'
+import { connection, tokenA, tokenB, surfWallet } from '../../../global.js'
 import { retryOnThrow } from '../../../utils/retryOnThrow.js'
+import { whirlpoolProgram } from '../config.js'
 
 const whirlpoolsAddresses = [
 	// tickSpacing: 1
+	// disabled because current liquidity is very low
 	// new PublicKey('83v8iPyZihDEjDdY8RdZddyZNyUtXngz69Lgo9Kt5d6d'),
 	// tickSpacing: 8
 	new PublicKey('7qbRF6YsyGuLUVs6Y1q64bdVrfe4ZcUUz1JRdoVNUJnm'),
@@ -168,7 +170,7 @@ export const buildSwapIx = async ({
 		return buildSwapIx({ outAmount })
 	}
 
-	const { instructions } = WhirlpoolIx.swapIx(ctx.program, {
+	const { instructions } = WhirlpoolIx.swapIx(whirlpoolProgram, {
 		...(bestSwapParams as BestSwapParams),
 		tokenOwnerAccountA: tokenA.ATAddress,
 		tokenOwnerAccountB: tokenB.ATAddress,

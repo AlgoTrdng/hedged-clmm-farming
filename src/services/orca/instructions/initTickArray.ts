@@ -7,8 +7,9 @@ import {
 } from '@orca-so/whirlpools-sdk'
 
 import { WHIRLPOOL_ADDRESS } from '../../../config/index.js'
-import { fetcher, ctx, surfWallet } from '../../../global.js'
+import { surfWallet } from '../../../global.js'
 import { retryOnThrow } from '../../../utils/retryOnThrow.js'
+import { fetcher, whirlpoolProgram } from '../config.js'
 
 export const buildInitTickArrayIx = async (whirlpoolData: WhirlpoolData) => {
 	const startTick = TickUtil.getStartTickIndex(
@@ -21,7 +22,7 @@ export const buildInitTickArrayIx = async (whirlpoolData: WhirlpoolData) => {
 	)
 
 	if (!tickArrayAccount) {
-		const ix = WhirlpoolIx.initTickArrayIx(ctx.program, {
+		const ix = WhirlpoolIx.initTickArrayIx(whirlpoolProgram, {
 			startTick,
 			tickArrayPda,
 			whirlpool: WHIRLPOOL_ADDRESS,

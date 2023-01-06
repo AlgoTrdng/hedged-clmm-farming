@@ -37,7 +37,11 @@ export const executeJupiterSwap = async ({
 			return
 		}
 
-		if (res.status === 'BLOCK_HEIGHT_EXCEEDED' || res.error?.error === 6000 || res.error?.error === 6001) {
+		if (
+			res.status === 'BLOCK_HEIGHT_EXCEEDED' ||
+			res.error?.error === 6000 ||
+			res.error?.error === 6001
+		) {
 			tx = await _fetchTxs()
 			continue
 		}

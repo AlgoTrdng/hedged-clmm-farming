@@ -11,17 +11,19 @@ dotenv.config()
 const __dirname = dirname(fileURLToPath(import.meta.url))
 const rootDir = __dirname.split('dist')[0]
 
-const formatZodErrors = (error: ZodFormattedError<Record<string, string>, string>) => Object.entries(error)
-.map(([name, value]) => {
-	if (value && "_errors" in value)
-		return `${name}: ${value._errors.join(", ")}\n`
-})
-.filter(Boolean)
+const formatZodErrors = (error: ZodFormattedError<Record<string, string>, string>) =>
+	Object.entries(error)
+		.map(([name, value]) => {
+			if (value && '_errors' in value) return `${name}: ${value._errors.join(', ')}\n`
+		})
+		.filter(Boolean)
 
 export const loadEnv = () => {
 	const envConfigRes = envConfigSchema.safeParse(process.env)
 	if (!envConfigRes.success) {
-		const errors = formatZodErrors(envConfigRes.error.format() as ZodFormattedError<Record<string, string>, string>)
+		const errors = formatZodErrors(
+			envConfigRes.error.format() as ZodFormattedError<Record<string, string>, string>,
+		)
 		console.error('[ENV]: Invalid env variables:\n', ...errors)
 		throw Error('Invalid env variables')
 	}
@@ -34,7 +36,9 @@ export const loadConfig = async () => {
 	})
 	const configRes = configSchema.safeParse(JSON.parse(configFile))
 	if (!configRes.success) {
-		const errors = formatZodErrors(configRes.error.format() as ZodFormattedError<Record<string, string>, string>)
+		const errors = formatZodErrors(
+			configRes.error.format() as ZodFormattedError<Record<string, string>, string>,
+		)
 		console.error('[CONFIG]: Invalid config:\n', ...errors)
 		throw Error('Invalid config')
 	}
