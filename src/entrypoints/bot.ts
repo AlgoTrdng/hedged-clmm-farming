@@ -15,10 +15,10 @@ import {
 	getBoundariesFromTickIndexes,
 	getAllowedPriceMoveFromBoundaries,
 } from '../services/orca/helpers/priceHelpers.js'
-import { state } from '../state.js'
+import { setState, state } from '../state.js'
 import { forceSendTx } from '../utils/forceSendTx.js'
 import { buildCreateATAccountsIxs } from '../services/wallet/createATAccounts.js'
-import { buildTransferTokensIxs } from '../services/wallet/transferTokens.js'
+import { buildDepositToSurfWalletIxs } from '../services/wallet/transferTokens.js'
 
 const whirlpoolData = await fetchAndUpdateWhirlpoolData()
 
@@ -26,7 +26,7 @@ const whirlpoolData = await fetchAndUpdateWhirlpoolData()
 await (async () => {
 	// Initialize all ATAs, transfer tokens to surf wallet
 	const initializeATAccountsIxs = await buildCreateATAccountsIxs(whirlpoolData.value.rewardInfos)
-	const transferTokensIxs = buildTransferTokensIxs()
+	const transferTokensIxs = buildDepositToSurfWalletIxs()
 	const setupDriftIxs = await buildDriftInitializeUserIx()
 
 	const instructions = [
@@ -76,10 +76,13 @@ await (async () => {
 	})
 	const allowedPriceMove = getAllowedPriceMoveFromBoundaries(boundaries)
 
-	state.driftPosition = driftPosition
-	state.whirlpoolPosition = whirlpoolPosition
-	state.priceMoveWithoutDriftAdjustment = allowedPriceMove
-	state.lastAdjustmentPrice = price
+	await setState({
+		priceMoveWithoutDriftAdjustment: allowedPriceMove,
+		lastAdjustmentPrice: price,
+		driftPosition,
+		whirlpoolPosition,
+	})
+
 	console.log(
 		'Hedged position opened\n',
 		`Current pool price: ${price}\n`,
@@ -134,7 +137,6 @@ while (true) {
 			currentPrice: currentPoolPrice,
 			whirlpoolData: whirlpoolData.value,
 		})
-		state.whirlpoolPosition = adjustedWhirlpoolPosition
 		console.log(
 			'Adjusted whirlpool position\n',
 			`Upper boundary: ${upperBoundaryPrice.toFixed(6)}\n`,
@@ -144,18 +146,21 @@ while (true) {
 		console.log('Adjusting drift position')
 		const adjustedDriftPosition = await adjustDriftPosition({
 			driftPosition: state.driftPosition,
-			whirlpoolPositionData: state.whirlpoolPosition,
+			whirlpoolPositionData: adjustedWhirlpoolPosition,
 		})
 		console.log('New drift position borrowed amount: ', adjustedDriftPosition.borrowAmount)
-
-		state.driftPosition = adjustedDriftPosition
-		state.lastAdjustmentPrice = currentPoolPrice
 
 		const boundaries = getBoundariesFromTickIndexes({
 			tickLowerIndex: adjustedWhirlpoolPosition.tickLowerIndex,
 			tickUpperIndex: adjustedWhirlpoolPosition.tickUpperIndex,
 		})
-		state.priceMoveWithoutDriftAdjustment = getAllowedPriceMoveFromBoundaries(boundaries)
+
+		await setState({
+			whirlpoolPosition: adjustedWhirlpoolPosition,
+			driftPosition: adjustedDriftPosition,
+			lastAdjustmentPrice: currentPoolPrice,
+			priceMoveWithoutDriftAdjustment: getAllowedPriceMoveFromBoundaries(boundaries),
+		})
 		continue
 	}
 
@@ -175,6 +180,8 @@ while (true) {
 	})
 	console.log('New drift position borrowed amount: ', adjustedDriftPosition.borrowAmount)
 
-	state.driftPosition = adjustedDriftPosition
-	state.lastAdjustmentPrice = currentPoolPrice
+	await setState({
+		driftPosition: adjustedDriftPosition,
+		lastAdjustmentPrice: currentPoolPrice,
+	})
 }

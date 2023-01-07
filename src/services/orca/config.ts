@@ -4,7 +4,7 @@ import {
 	AccountFetcher,
 } from '@orca-so/whirlpools-sdk'
 
-import { connection, provider } from '../../global'
+import { connection, provider } from '../../global.js'
 
 export const fetcher = new AccountFetcher(connection)
 

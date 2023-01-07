@@ -75,6 +75,8 @@ const [tokenASpotMarket, tokenBSpotMarket] = (
 	) as SpotMarketAccount
 })
 
+export { tokenASpotMarket, tokenBSpotMarket }
+
 export const DRIFT_TOKEN_A_SPOT_VAULT = tokenASpotMarket.vault
 export const DRIFT_TOKEN_B_SPOT_VAULT = tokenBSpotMarket.vault
 

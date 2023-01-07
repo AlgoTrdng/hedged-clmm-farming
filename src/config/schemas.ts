@@ -5,6 +5,7 @@ export const envConfigSchema = z.object({
 	ANCHOR_PROVIDER_URL: z.string().min(1),
 	ANCHOR_WALLET: z.string().min(1),
 	SURF_WALLET_CACHE: z.string().min(1),
+	DB_DATA: z.string().min(1),
 })
 
 export const configSchema = z.object({
