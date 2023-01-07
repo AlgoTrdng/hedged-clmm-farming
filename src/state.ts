@@ -26,7 +26,10 @@ type EmptyState = Record<string, never>
 type NonEmptyState = z.infer<typeof stateSchema>
 export type State = NonEmptyState | EmptyState
 
-export type PositionAddresses = Pick<NonEmptyState['whirlpoolPosition'], 'ATAddress' | 'PDAddress' | 'positionMint'>
+export type PositionAddresses = Pick<
+	NonEmptyState['whirlpoolPosition'],
+	'ATAddress' | 'PDAddress' | 'positionMint'
+>
 export type WhirlpoolPosition = NonEmptyState['whirlpoolPosition']
 export type DriftPosition = NonEmptyState['driftPosition']
 
@@ -42,7 +45,7 @@ export const loadState = async () => {
 
 export const setState = async (updatedState: Partial<NonEmptyState>) => {
 	Object.assign(state, updatedState)
-	
+
 	const toSerialize = { ...state } as unknown as NonEmptyState
 	if (toSerialize.whirlpoolPosition.liquidity) {
 		// @ts-ignore

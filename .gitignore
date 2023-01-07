@@ -1,8 +1,6 @@
 node_modules
 .env
 dist
-wallet.json
-db-data.json
 config.json
 out.log
-surf-wallet-cache.json
+ignore

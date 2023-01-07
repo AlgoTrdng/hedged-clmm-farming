@@ -24,28 +24,3 @@ export const buildDepositToSurfWalletIxs = () => {
 
 	return ixs
 }
-
-type TokenAmounts = {
-	tokenA: number
-	tokenB: number
-}
-
-export const buildWithdrawFromSurfWalletIxs = (tokenAmounts: TokenAmounts) => {
-	const ixs: TransactionInstruction[] = []
-
-	ixs.push(
-		SystemProgram.transfer({
-			fromPubkey: surfWallet.publicKey,
-			lamports: tokenAmounts.tokenA - 5000,
-			toPubkey: userWallet.publicKey,
-		}),
-		createTransferInstruction(
-			tokenB.ATAddress,
-			userTokenBATAccount,
-			surfWallet.publicKey,
-			tokenAmounts.tokenB,
-		),
-	)
-
-	return ixs
-}

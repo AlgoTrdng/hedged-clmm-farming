@@ -61,7 +61,7 @@ export const getOrCreateSurfWallet = async () => {
 			driftUser: driftUser.toString(),
 		}
 
-		await fs.writeFile(SURF_WALLET_CACHE, JSON.stringify(surfWalletCache, null, 2))
+		await fs.writeFile(SURF_WALLET_CACHE, JSON.stringify(surfWalletCache))
 
 		console.log(
 			'Created new surf wallet\n',

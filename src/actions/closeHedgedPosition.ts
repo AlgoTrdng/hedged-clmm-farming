@@ -1,4 +1,4 @@
-import { decreaseLiquidityQuoteByLiquidityWithParams } from '@orca-so/whirlpools-sdk'
+import { decreaseLiquidityQuoteByLiquidityWithParams, WhirlpoolData } from '@orca-so/whirlpools-sdk'
 import { ComputeBudgetProgram, ConfirmedTransactionMeta } from '@solana/web3.js'
 import { buildAndSignTxFromInstructions, sendTransaction } from 'solana-tx-utils'
 import { createCloseAccountInstruction } from '@solana/spl-token'
@@ -15,21 +15,23 @@ import { buildSwapIx } from '../services/orca/instructions/swap.js'
 import { state } from '../state.js'
 import { loadALTAccount } from '../utils/loadALTAccount.js'
 
-export const closeHedgedPosition = async (): Promise<ConfirmedTransactionMeta> => {
+export const closeHedgedPosition = async (
+	whirlpoolData?: WhirlpoolData,
+): Promise<ConfirmedTransactionMeta> => {
 	const ALTAccountPromise = loadALTAccount()
-	const whirlpoolData = await fetchWhirlpoolData()
+	const _whirlpoolData = whirlpoolData || (await fetchWhirlpoolData())
 	const { whirlpoolPosition } = state
 
 	const decreaseLiquidityQuote = decreaseLiquidityQuoteByLiquidityWithParams({
 		liquidity: whirlpoolPosition.liquidity,
 		slippageTolerance: SLIPPAGE_TOLERANCE,
-		sqrtPrice: whirlpoolData.sqrtPrice,
-		tickCurrentIndex: whirlpoolData.tickCurrentIndex,
+		sqrtPrice: _whirlpoolData.sqrtPrice,
+		tickCurrentIndex: _whirlpoolData.tickCurrentIndex,
 		tickLowerIndex: whirlpoolPosition.tickLowerIndex,
 		tickUpperIndex: whirlpoolPosition.tickUpperIndex,
 	})
 	const { instructions, withdrawAmounts } = buildCloseWhirlpoolPositionIxs({
-		whirlpoolData,
+		whirlpoolData: _whirlpoolData,
 		whirlpoolPosition,
 		decreaseLiquidityQuote,
 	})

@@ -9,12 +9,13 @@ import { buildOpenWhirlpoolPositionIx } from '../instructions/openWhirlpoolPosit
 import { executeJupiterSwap } from '../services/jupiter/swap.js'
 import { DriftPosition, WhirlpoolPosition } from '../state.js'
 import { buildSwapIx } from '../services/orca/instructions/swap.js'
+import { fetchWhirlpoolData } from '../services/orca/getWhirlpoolData.js'
 
 type OpenHedgedPositionParams = {
 	usdcAmountRaw: number
 	upperBoundaryPrice: number
 	lowerBoundaryPrice: number
-	whirlpoolData: WhirlpoolData
+	whirlpoolData?: WhirlpoolData
 }
 
 type HedgedPosition = {
@@ -32,6 +33,8 @@ export const openHedgedPosition = async ({
 	const orcaAmount = Math.floor(safeInputAmountRaw * 0.5)
 	const collateralAmount = safeInputAmountRaw - orcaAmount
 
+	const _whirlpoolData = whirlpoolData || (await fetchWhirlpoolData())
+
 	// Deposit to Orca
 	const {
 		instructions: openWhirlpoolPositionIxs,
@@ -39,7 +42,7 @@ export const openHedgedPosition = async ({
 		depositAmounts,
 		...whirlpoolPosition
 	} = await buildOpenWhirlpoolPositionIx({
-		whirlpoolData,
+		whirlpoolData: _whirlpoolData,
 		amountRaw: orcaAmount,
 		upperBoundaryPrice,
 		lowerBoundaryPrice,
@@ -102,7 +105,6 @@ export const openHedgedPosition = async ({
 				usdcAmountRaw,
 				upperBoundaryPrice,
 				lowerBoundaryPrice,
-				whirlpoolData,
 			})
 		}
 	}
