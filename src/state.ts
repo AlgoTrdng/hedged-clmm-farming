@@ -46,7 +46,11 @@ export const loadState = async () => {
 export const setState = async (updatedState: Partial<NonEmptyState>) => {
 	Object.assign(state, updatedState)
 
-	const toSerialize = { ...state } as unknown as NonEmptyState
+	const _state = state as unknown as NonEmptyState
+	const toSerialize: NonEmptyState = {
+		..._state,
+		whirlpoolPosition: { ...(_state?.whirlpoolPosition || {}) },
+	}
 	if (toSerialize.whirlpoolPosition.liquidity) {
 		// @ts-ignore
 		toSerialize.whirlpoolPosition.liquidity = toSerialize.whirlpoolPosition.liquidity.toString()

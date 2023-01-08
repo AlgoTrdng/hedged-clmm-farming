@@ -10,6 +10,7 @@ import { executeJupiterSwap } from '../services/jupiter/swap.js'
 import { DriftPosition, WhirlpoolPosition } from '../state.js'
 import { buildSwapIx } from '../services/orca/instructions/swap.js'
 import { fetchWhirlpoolData } from '../services/orca/getWhirlpoolData.js'
+import { buildPriorityFeeIxs } from '../instructions/priorityFee.js'
 
 type OpenHedgedPositionParams = {
 	usdcAmountRaw: number
@@ -70,6 +71,10 @@ export const openHedgedPosition = async ({
 			signers: [surfWallet, ...additionalSigners],
 			addressLookupTables: [ALTAccount],
 			instructions: [
+				...buildPriorityFeeIxs({
+					units: 450000,
+					unitPrice: 15000,
+				}),
 				prepareDepositAmountIx,
 				...openWhirlpoolPositionIxs,
 				depositUsdcToDrift,

@@ -41,7 +41,6 @@ export const readAnalytics = async () => {
 
 export const updateAnalytics = async (data: SnapshotData) => {
 	const existingData = await readAnalytics()
-	console.log(existingData)
 	existingData.push(data)
 	await fs.writeFile(ANALYTICS, JSON.stringify(existingData, null, 2))
 }

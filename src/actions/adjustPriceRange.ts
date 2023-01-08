@@ -16,7 +16,8 @@ import {
 import { loadALTAccount } from '../utils/loadALTAccount.js'
 import { WhirlpoolPosition } from '../state.js'
 import { buildSwapIx } from '../services/orca/instructions/swap.js'
-import { fetchJupiterInstructions } from '../services/jupiter/transaction.js'
+import { fetchJupiterIx } from '../services/jupiter/transaction.js'
+import { buildPriorityFeeIxs } from '../instructions/priorityFee.js'
 
 type AdjustPriceRangeParams = {
 	whirlpoolPosition: WhirlpoolPosition
@@ -74,7 +75,7 @@ export const adjustPriceRange = async ({
 
 	if (tokenADiff < 0) {
 		// need to swap SOL to USDC
-		const { instructions: swapIxs, ATLAccounts: swapALTAccounts } = await fetchJupiterInstructions({
+		const { instruction: swapIx, ALTAccounts: swapALTAccounts } = await fetchJupiterIx({
 			inputMint: tokenA.mint,
 			outputMint: tokenB.mint,
 			unwrapSol: false,
@@ -82,11 +83,23 @@ export const adjustPriceRange = async ({
 			amountRaw: Math.abs(tokenADiff),
 			onlyDirectRoutes: true,
 		})
-		swapInstructions.push(...swapIxs)
+		swapInstructions.unshift(
+			...buildPriorityFeeIxs({
+				units: 600000,
+				unitPrice: 50000,
+			}),
+		)
+		swapInstructions.push(swapIx)
 		ALTAccounts.push(...swapALTAccounts)
 	} else if (tokenADiff > 0) {
 		// need to swap USDC to SOL
 		const ix = await buildSwapIx({ outAmount: tokenADiff, aToB: false })
+		swapInstructions.unshift(
+			...buildPriorityFeeIxs({
+				units: 350000,
+				unitPrice: 80000,
+			}),
+		)
 		swapInstructions.push(ix)
 	}
 

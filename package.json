@@ -15,7 +15,8 @@
 		"pm2:bot": "pm2 start pm2/bot.config.cjs",
 		"pm2:bot:stop": "pm2 stop pm2/bot.config.cjs",
 		"pm2:analytics": "pm2 start pm2/analytics.config.cjs",
-		"pm2:analytics:stop": "pm2 stop pm2/analytics.config.cjs"
+		"pm2:analytics:stop": "pm2 stop pm2/analytics.config.cjs",
+		"pm2:stop-all": "pm2 stop pm2/bot.config.cjs && pm2 stop pm2/analytics.config.cjs"
 	},
 	"devDependencies": {
 		"@types/bn.js": "^5.1.1",

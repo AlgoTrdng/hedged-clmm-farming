@@ -7,11 +7,12 @@ import BN from 'bn.js'
 import { connection, surfWallet, tokenA, tokenB } from '../global.js'
 import { buildDriftDepositIx } from '../services/drift/instructions/deposit.js'
 import { buildDriftWithdrawIx } from '../services/drift/instructions/withdraw.js'
-import { fetchJupiterInstructions } from '../services/jupiter/transaction.js'
+import { fetchJupiterIx } from '../services/jupiter/transaction.js'
 import { fetchWhirlpoolData } from '../services/orca/getWhirlpoolData.js'
 import { loadALTAccount } from '../utils/loadALTAccount.js'
 import { DriftPosition, WhirlpoolPosition } from '../state.js'
 import { buildSwapIx } from '../services/orca/instructions/swap.js'
+import { buildPriorityFeeIxs } from '../instructions/priorityFee.js'
 
 type AdjustHedgePositionParams = {
 	driftPosition: DriftPosition
@@ -54,7 +55,7 @@ export const adjustDriftPosition = async ({
 			token: tokenA,
 			borrow: true,
 		})
-		const { instructions: swapIxs, ATLAccounts: swapATLAccounts } = await fetchJupiterInstructions({
+		const { instruction: swapIx, ALTAccounts: swapATLAccounts } = await fetchJupiterIx({
 			inputMint: tokenA.mint,
 			outputMint: tokenB.mint,
 			unwrapSol: false,
@@ -62,7 +63,14 @@ export const adjustDriftPosition = async ({
 			amountRaw: tokenADiff,
 			onlyDirectRoutes: true,
 		})
-		instructions.push(borrowIx, ...swapIxs)
+		instructions.push(
+			...buildPriorityFeeIxs({
+				units: 650000,
+				unitPrice: 50000,
+			}),
+			borrowIx,
+			swapIx,
+		)
 		ALTAccounts.push(...swapATLAccounts)
 	} else if (tokenADiff < 0) {
 		// Position tokenA is lower than hedged tokenA, repay diff
@@ -75,7 +83,14 @@ export const adjustDriftPosition = async ({
 			token: tokenA,
 			repay: true,
 		})
-		instructions.push(ix, repayIx)
+		instructions.push(
+			...buildPriorityFeeIxs({
+				units: 250000,
+				unitPrice: 80000,
+			}),
+			ix,
+			repayIx,
+		)
 	}
 
 	if (!instructions.length) {

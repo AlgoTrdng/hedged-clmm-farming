@@ -4,7 +4,6 @@ import {
 	TransactionMessage,
 	VersionedTransaction,
 } from '@solana/web3.js'
-import { BuiltTransactionData } from 'solana-tx-utils'
 import fetch from 'node-fetch'
 import { setTimeout } from 'node:timers/promises'
 
@@ -55,7 +54,7 @@ const _fetchEncodedTx = async ({
 	}
 }
 
-export const fetchJupiterInstructions = async ({
+export const fetchJupiterIx = async ({
 	inputMint,
 	outputMint,
 	amountRaw,
@@ -63,8 +62,8 @@ export const fetchJupiterInstructions = async ({
 	onlyDirectRoutes,
 	unwrapSol = true,
 }: ExecuteJupiterSwapParams): Promise<{
-	instructions: TransactionInstruction[]
-	ATLAccounts: AddressLookupTableAccount[]
+	instruction: TransactionInstruction
+	ALTAccounts: AddressLookupTableAccount[]
 }> => {
 	const tx = await _fetchEncodedTx({
 		inputMint,
@@ -75,10 +74,15 @@ export const fetchJupiterInstructions = async ({
 		onlyDirectRoutes,
 	})
 
+	const getSwapIx = (msg: TransactionMessage) => {
+		const ixs = msg.instructions
+		return ixs[ixs.length - 1]
+	}
+
 	if (!tx.message.addressTableLookups.length) {
 		return {
-			instructions: TransactionMessage.decompile(tx.message).instructions,
-			ATLAccounts: [],
+			instruction: getSwapIx(TransactionMessage.decompile(tx.message)),
+			ALTAccounts: [],
 		}
 	}
 
@@ -87,7 +91,7 @@ export const fetchJupiterInstructions = async ({
 			tx.message.addressTableLookups.map(({ accountKey }) => accountKey),
 		),
 	)
-	const ATLAccounts = ATLAccountsInfos.map((ai, i) => {
+	const ALTAccounts = ATLAccountsInfos.map((ai, i) => {
 		if (!ai) {
 			throw Error(
 				`Could not load account info for: ${tx.message.addressTableLookups[
@@ -101,37 +105,10 @@ export const fetchJupiterInstructions = async ({
 		})
 	})
 	const message = TransactionMessage.decompile(tx.message, {
-		addressLookupTableAccounts: ATLAccounts,
+		addressLookupTableAccounts: ALTAccounts,
 	})
 	return {
-		instructions: message.instructions,
-		ATLAccounts,
-	}
-}
-
-export const fetchAndSignJupiterTransaction = async ({
-	inputMint,
-	outputMint,
-	amountRaw,
-	swapMode,
-	unwrapSol = true,
-	onlyDirectRoutes,
-}: ExecuteJupiterSwapParams): Promise<BuiltTransactionData> => {
-	const tx = await _fetchEncodedTx({
-		inputMint,
-		outputMint,
-		amountRaw,
-		swapMode,
-		unwrapSol,
-		onlyDirectRoutes,
-	})
-	const { blockhash, lastValidBlockHeight } = await retryOnThrow(() =>
-		connection.getLatestBlockhash(),
-	)
-	tx.message.recentBlockhash = blockhash
-	tx.sign([surfWallet])
-	return {
-		transaction: tx,
-		lastValidBlockHeight,
+		instruction: getSwapIx(message),
+		ALTAccounts,
 	}
 }

@@ -1,5 +1,5 @@
 import { decreaseLiquidityQuoteByLiquidityWithParams, WhirlpoolData } from '@orca-so/whirlpools-sdk'
-import { ComputeBudgetProgram, ConfirmedTransactionMeta } from '@solana/web3.js'
+import { ConfirmedTransactionMeta } from '@solana/web3.js'
 import { buildAndSignTxFromInstructions, sendTransaction } from 'solana-tx-utils'
 import { createCloseAccountInstruction } from '@solana/spl-token'
 import { setTimeout } from 'node:timers/promises'
@@ -14,6 +14,7 @@ import { fetchWhirlpoolData } from '../services/orca/getWhirlpoolData.js'
 import { buildSwapIx } from '../services/orca/instructions/swap.js'
 import { state } from '../state.js'
 import { loadALTAccount } from '../utils/loadALTAccount.js'
+import { buildPriorityFeeIxs } from '../instructions/priorityFee.js'
 
 export const closeHedgedPosition = async (
 	whirlpoolData?: WhirlpoolData,
@@ -69,7 +70,10 @@ export const closeHedgedPosition = async (
 		{
 			signers: [surfWallet],
 			instructions: [
-				ComputeBudgetProgram.setComputeUnitLimit({ units: 300000 }),
+				...buildPriorityFeeIxs({
+					units: 300000,
+					unitPrice: 80000,
+				}),
 				...instructions,
 				repayIx,
 				withdrawIx,
