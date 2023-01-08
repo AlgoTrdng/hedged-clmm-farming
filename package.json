@@ -10,6 +10,7 @@
 		"build:w": "rm -rf dist && tsc -w",
 		"start": "node dist/entrypoints/bot.js",
 		"stop": "node dist/entrypoints/withdraw.js",
+		"analytics": "node dist/entrypoints/analytics.js",
 		"format": "prettier . --write",
 		"pm2:prod": "rm -rf dist && npm run build && pm2 start pm2.config.cjs"
 	},
@@ -31,14 +32,11 @@
 		"@orca-so/whirlpools-sdk": "^0.6.0",
 		"@project-serum/anchor": "^0.25.0",
 		"@solana/buffer-layout": "^4.0.0",
-		"@solana/buffer-layout-utils": "^0.2.0",
 		"@solana/spl-token": "^0.3.6",
 		"@solana/web3.js": "^1.67.0",
-		"@solendprotocol/solend-sdk": "^0.6.9",
 		"bn.js": "^5.2.1",
 		"decimal.js": "^10.4.2",
 		"dotenv": "^16.0.3",
-		"lowdb": "^5.0.5",
 		"node-fetch": "^3.3.0",
 		"solana-tx-utils": "^0.0.9",
 		"zod": "^3.19.1"

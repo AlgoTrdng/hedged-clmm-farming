@@ -7,7 +7,7 @@ import { setTimeout } from 'node:timers/promises'
 import { SLIPPAGE_TOLERANCE } from '../constants.js'
 import { connection, surfWallet, tokenA, tokenB } from '../global.js'
 import { buildCloseWhirlpoolPositionIxs } from '../instructions/closeWhirlpoolPosition.js'
-import { getSpotMarketsTokenAmounts } from '../services/drift/getBorrowedAmount.js'
+import { getDriftTokenAmounts } from '../services/drift/getTokenAmount.js'
 import { buildDriftDepositIx } from '../services/drift/instructions/deposit.js'
 import { buildDriftWithdrawIx } from '../services/drift/instructions/withdraw.js'
 import { fetchWhirlpoolData } from '../services/orca/getWhirlpoolData.js'
@@ -37,7 +37,7 @@ export const closeHedgedPosition = async (
 	})
 
 	const { tokenA: tokenABorrowedAmount, tokenB: tokenBSuppliedAmount } =
-		await getSpotMarketsTokenAmounts()
+		await getDriftTokenAmounts()
 
 	const tokenADiff = withdrawAmounts.tokenA - tokenABorrowedAmount
 	if (tokenADiff - 100_000 < 0) {

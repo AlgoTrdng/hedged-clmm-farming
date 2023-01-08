@@ -1,17 +1,18 @@
 import { UserAccount, getTokenAmount } from '@drift-labs/sdk'
+import { AccountInfo } from '@solana/web3.js'
 
 import { connection, driftUser } from '../../global.js'
 import { retryOnThrow } from '../../utils/retryOnThrow.js'
-import { driftProgram, tokenASpotMarket } from './config.js'
+import { driftProgram, tokenASpotMarket, tokenBSpotMarket } from './config.js'
 
-export const getSpotMarketsTokenAmounts = async () => {
-	const driftUserAccount = await retryOnThrow(() =>
-		connection.getAccountInfo(driftUser, 'confirmed'),
-	)
-	if (!driftUserAccount?.data) {
+export const getDriftTokenAmounts = async (driftUserAccount?: AccountInfo<Buffer>) => {
+	const _driftUserAccount =
+		driftUserAccount ||
+		(await retryOnThrow(() => connection.getAccountInfo(driftUser, 'confirmed')))
+	if (!_driftUserAccount?.data) {
 		throw Error('Drift user account does not exist')
 	}
-	const parsed = driftProgram.coder.accounts.decode<UserAccount>('User', driftUserAccount.data)
+	const parsed = driftProgram.coder.accounts.decode<UserAccount>('User', _driftUserAccount.data)
 
 	const [tokenBSpotPosition, tokenASpotPosition] = parsed.spotPositions
 	return {
@@ -22,7 +23,7 @@ export const getSpotMarketsTokenAmounts = async () => {
 		).toNumber(),
 		tokenB: getTokenAmount(
 			tokenBSpotPosition.scaledBalance,
-			tokenASpotMarket,
+			tokenBSpotMarket,
 			tokenBSpotPosition.balanceType,
 		).toNumber(),
 	}

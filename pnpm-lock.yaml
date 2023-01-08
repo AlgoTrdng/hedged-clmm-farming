@@ -6,10 +6,8 @@ specifiers:
   '@orca-so/whirlpools-sdk': ^0.6.0
   '@project-serum/anchor': ^0.25.0
   '@solana/buffer-layout': ^4.0.0
-  '@solana/buffer-layout-utils': ^0.2.0
   '@solana/spl-token': ^0.3.6
   '@solana/web3.js': ^1.67.0
-  '@solendprotocol/solend-sdk': ^0.6.9
   '@types/bn.js': ^5.1.1
   '@types/node': ^18.7.18
   '@typescript-eslint/eslint-plugin': ^5.35.1
@@ -19,7 +17,6 @@ specifiers:
   dotenv: ^16.0.3
   eslint: ^8.22.0
   eslint-config-prettier: ^8.5.0
-  lowdb: ^5.0.5
   node-fetch: ^3.3.0
   nodemon: ^2.0.20
   prettier: ^2.7.1
@@ -33,14 +30,11 @@ dependencies:
   '@orca-so/whirlpools-sdk': 0.6.0
   '@project-serum/anchor': 0.25.0
   '@solana/buffer-layout': 4.0.0
-  '@solana/buffer-layout-utils': 0.2.0
   '@solana/spl-token': 0.3.6_@solana+web3.js@1.67.0
   '@solana/web3.js': 1.67.0
-  '@solendprotocol/solend-sdk': 0.6.9
   bn.js: 5.2.1
   decimal.js: 10.4.2
   dotenv: 16.0.3
-  lowdb: 5.0.5
   node-fetch: 3.3.0
   solana-tx-utils: 0.0.9
   zod: 3.19.1
@@ -137,23 +131,6 @@ packages:
       }
     dev: true
 
-  /@marinade.finance/marinade-ts-sdk/3.1.4:
-    resolution:
-      {
-        integrity: sha512-gnjgQyBHev9nUROlirazTHved9nUzs3WEHqu50yYceYZucKAXvFltE2YgOywGNTfrLI/MMsWIQLmurwDFdbDnA==,
-      }
-    dependencies:
-      '@project-serum/anchor': 0.18.2
-      '@solana/spl-token': 0.1.8
-      bignumber.js: 9.1.0
-      borsh: 0.6.0
-      bs58: 5.0.0
-    transitivePeerDependencies:
-      - bufferutil
-      - encoding
-      - utf-8-validate
-    dev: false
-
   /@metaplex-foundation/mpl-core/0.0.2:
     resolution:
       {
@@ -178,22 +155,6 @@ packages:
       '@metaplex-foundation/mpl-core': 0.0.2
       '@solana/spl-token': 0.1.8
       '@solana/web3.js': 1.67.0
-    transitivePeerDependencies:
-      - bufferutil
-      - encoding
-      - utf-8-validate
-    dev: false
-
-  /@mithraic-labs/psy-american/0.2.2:
-    resolution:
-      {
-        integrity: sha512-MmgLH3Mx4/TXXKLTWApRLchHaUteO31YC8jbtA6/GLqvSpIkLwfcmlzN7Ncca7UgWWCmDYgI3J15hRubqkTjmw==,
-      }
-    dependencies:
-      '@project-serum/anchor': 0.24.2
-      '@project-serum/serum': 0.13.65
-      '@solana/spl-token': 0.1.8
-      '@solana/web3.js': 1.70.1
     transitivePeerDependencies:
       - bufferutil
       - encoding
@@ -313,33 +274,6 @@ packages:
       - utf-8-validate
     dev: false
 
-  /@project-serum/anchor/0.18.2:
-    resolution:
-      {
-        integrity: sha512-uyjiN/3Ipp+4hrZRm/hG18HzGLZyvP790LXrCsGO3IWxSl28YRhiGEpKnZycfMW94R7nxdUoE3wY67V+ZHSQBQ==,
-      }
-    engines: { node: '>=11' }
-    dependencies:
-      '@project-serum/borsh': 0.2.5_@solana+web3.js@1.70.1
-      '@solana/web3.js': 1.70.1
-      base64-js: 1.5.1
-      bn.js: 5.2.1
-      bs58: 4.0.1
-      buffer-layout: 1.2.2
-      camelcase: 5.3.1
-      crypto-hash: 1.3.0
-      eventemitter3: 4.0.7
-      find: 0.3.0
-      js-sha256: 0.9.0
-      pako: 2.1.0
-      snake-case: 3.0.4
-      toml: 3.0.0
-    transitivePeerDependencies:
-      - bufferutil
-      - encoding
-      - utf-8-validate
-    dev: false
-
   /@project-serum/anchor/0.22.1:
     resolution:
       {
@@ -358,33 +292,6 @@ packages:
       crypto-hash: 1.3.0
       eventemitter3: 4.0.7
       find: 0.3.0
-      js-sha256: 0.9.0
-      pako: 2.1.0
-      snake-case: 3.0.4
-      toml: 3.0.0
-    transitivePeerDependencies:
-      - bufferutil
-      - encoding
-      - utf-8-validate
-    dev: false
-
-  /@project-serum/anchor/0.24.2:
-    resolution:
-      {
-        integrity: sha512-0/718g8/DnEuwAidUwh5wLYphUYXhUbiClkuRNhvNoa+1Y8a4g2tJyxoae+emV+PG/Gikd/QUBNMkIcimiIRTA==,
-      }
-    engines: { node: '>=11' }
-    dependencies:
-      '@project-serum/borsh': 0.2.5_@solana+web3.js@1.70.1
-      '@solana/web3.js': 1.70.1
-      base64-js: 1.5.1
-      bn.js: 5.2.1
-      bs58: 4.0.1
-      buffer-layout: 1.2.2
-      camelcase: 5.3.1
-      cross-fetch: 3.1.5
-      crypto-hash: 1.3.0
-      eventemitter3: 4.0.7
       js-sha256: 0.9.0
       pako: 2.1.0
       snake-case: 3.0.4
@@ -585,18 +492,6 @@ packages:
       - utf-8-validate
     dev: false
 
-  /@pythnetwork/client/2.8.0_@solana+web3.js@1.67.0:
-    resolution:
-      {
-        integrity: sha512-YqqZSDDsEApC/F4H5ejcl8OCr7gsWv0noTK8YABT8pCtFRTQxXBP0r2S8KQMaIw1x97Mue/jkYybdMeFQzPjCw==,
-      }
-    peerDependencies:
-      '@solana/web3.js': ^1.30.2
-    dependencies:
-      '@solana/web3.js': 1.67.0
-      buffer: 6.0.3
-    dev: false
-
   /@solana/buffer-layout-utils/0.2.0:
     resolution:
       {
@@ -771,36 +666,6 @@ packages:
     transitivePeerDependencies:
       - bufferutil
       - encoding
-      - utf-8-validate
-    dev: false
-
-  /@solendprotocol/solend-sdk/0.6.9:
-    resolution:
-      {
-        integrity: sha512-KToDqIDsn11hdNY3M/Lew5spSF2ML2S8q5H21pwjVxFW1BV01Mgm0Y1sD6pLnQ9epQUAqxtbGj1oUETs6bqFMQ==,
-      }
-    dependencies:
-      '@marinade.finance/marinade-ts-sdk': 3.1.4
-      '@mithraic-labs/psy-american': 0.2.2
-      '@project-serum/anchor': 0.24.2
-      '@pythnetwork/client': 2.8.0_@solana+web3.js@1.67.0
-      '@solana/buffer-layout': 4.0.0
-      '@solana/spl-token': 0.1.8
-      '@solana/web3.js': 1.67.0
-      axios: 0.24.0
-      bignumber.js: 9.1.0
-      bn.js: 5.2.1
-      buffer: 6.0.3
-      buffer-layout: 1.2.2
-      hot-shots: 9.3.0
-      isomorphic-fetch: 3.0.0
-      jsbi: 4.3.0
-      typedoc-plugin-cname: 1.0.1
-    transitivePeerDependencies:
-      - bufferutil
-      - debug
-      - encoding
-      - typedoc
       - utf-8-validate
     dev: false
 
@@ -1191,17 +1056,6 @@ packages:
     engines: { node: '>= 0.4' }
     dev: false
 
-  /axios/0.24.0:
-    resolution:
-      {
-        integrity: sha512-Q6cWsys88HoPgAaFAVUb0WpPk0O8iTeisR9IMqy9G8AbO4NlpVknrnQS03zzF9PGAWgO3cgletO3VjV/P7VztA==,
-      }
-    dependencies:
-      follow-redirects: 1.15.2
-    transitivePeerDependencies:
-      - debug
-    dev: false
-
   /balanced-match/1.0.2:
     resolution:
       {
@@ -1215,13 +1069,6 @@ packages:
       }
     dependencies:
       safe-buffer: 5.2.1
-    dev: false
-
-  /base-x/4.0.0:
-    resolution:
-      {
-        integrity: sha512-FuwxlW4H5kh37X/oW59pwTzzTKRzfrrQwhmyspRM7swOEZcHtDZSCt45U6oKgtuFE+WYPblePMVIPR4RZrh/hw==,
-      }
     dev: false
 
   /base64-js/1.5.1:
@@ -1280,17 +1127,6 @@ packages:
       }
     dev: false
 
-  /borsh/0.6.0:
-    resolution:
-      {
-        integrity: sha512-sl5k89ViqsThXQpYa9XDtz1sBl3l1lI313cFUY1HKr+wvMILnb+58xpkqTNrYbelh99dY7K8usxoCusQmqix9Q==,
-      }
-    dependencies:
-      bn.js: 5.2.1
-      bs58: 4.0.1
-      text-encoding-utf-8: 1.0.2
-    dev: false
-
   /borsh/0.7.0:
     resolution:
       {
@@ -1338,15 +1174,6 @@ packages:
       }
     dependencies:
       base-x: 3.0.9
-    dev: false
-
-  /bs58/5.0.0:
-    resolution:
-      {
-        integrity: sha512-r+ihvQJvahgYT50JD05dyJNKlmmSlMoOGwn1lCcEzanPglg7TxYjioQUYehQ9mAR/+hOSd2jRc/Z2y5UxBymvQ==,
-      }
-    dependencies:
-      base-x: 4.0.0
     dev: false
 
   /buffer-layout/1.2.2:
@@ -2030,19 +1857,6 @@ packages:
       }
     dev: true
 
-  /follow-redirects/1.15.2:
-    resolution:
-      {
-        integrity: sha512-VQLG33o04KaQ8uYi2tVNbdrWp1QWxNNea+nmIB4EVM28v0hmP17z7aG1+wAkNzVq4KeXTq3221ye5qTJP91JwA==,
-      }
-    engines: { node: '>=4.0' }
-    peerDependencies:
-      debug: '*'
-    peerDependenciesMeta:
-      debug:
-        optional: true
-    dev: false
-
   /for-each/0.3.3:
     resolution:
       {
@@ -2251,16 +2065,6 @@ packages:
       function-bind: 1.1.1
     dev: false
 
-  /hot-shots/9.3.0:
-    resolution:
-      {
-        integrity: sha512-e4tgWptiBvlIMnAX0ORe+dNEt0HznD+T2ckzXDUwCBsU7uWr2mwq5UtoT+Df5r9hD5S/DuP8rTxJUQvqAFSFKA==,
-      }
-    engines: { node: '>=6.0.0' }
-    optionalDependencies:
-      unix-dgram: 2.0.6
-    dev: false
-
   /ieee754/1.2.1:
     resolution:
       {
@@ -2422,18 +2226,6 @@ packages:
       }
     dev: true
 
-  /isomorphic-fetch/3.0.0:
-    resolution:
-      {
-        integrity: sha512-qvUtwJ3j6qwsF3jLxkZ72qCgjMysPzDfeV240JHiGZsANBYd+EEuu35v7dfrJ9Up0Ak07D7GGSkGhCHTqg/5wA==,
-      }
-    dependencies:
-      node-fetch: 2.6.7
-      whatwg-fetch: 3.6.2
-    transitivePeerDependencies:
-      - encoding
-    dev: false
-
   /isomorphic-ws/4.0.1_ws@7.5.9:
     resolution:
       {
@@ -2494,13 +2286,6 @@ packages:
     dependencies:
       argparse: 2.0.1
     dev: true
-
-  /jsbi/4.3.0:
-    resolution:
-      {
-        integrity: sha512-SnZNcinB4RIcnEyZqFPdGPVgrg2AcnykiBy0sHVJQKHYeaLUvi3Exj+iaPpLnFVkDPZIV4U0yvgC9/R4uEAZ9g==,
-      }
-    dev: false
 
   /json-schema-traverse/0.4.1:
     resolution:
@@ -2578,16 +2363,6 @@ packages:
       {
         integrity: sha512-XsP+KhQif4bjX1kbuSiySJFNAehNxgLb6hPRGJ9QsUr8ajHkuXGdrHmFUTUUXhDwVX2R5bY4JNZEwbUiMhV+MA==,
       }
-    dev: false
-
-  /lowdb/5.0.5:
-    resolution:
-      {
-        integrity: sha512-7EWKmIMhNKA8TXFhL8t0p6N2LC53l3ZqsWQGSksGhhjrcms9rbKlyrAh2PzSGK5v0KPJ2W5VItBnC3NDRzOnzQ==,
-      }
-    engines: { node: '>=14.16' }
-    dependencies:
-      steno: 3.0.0
     dev: false
 
   /lower-case/2.0.2:
@@ -2694,14 +2469,6 @@ packages:
         integrity: sha512-6FlzubTLZG3J2a/NVCAleEhjzq5oxgHyaCU9yYXvcLsvoVaHJq/s5xXI6/XXP6tz7R9xAOtHnSO/tXtF3WRTlA==,
       }
     dev: true
-
-  /nan/2.17.0:
-    resolution:
-      {
-        integrity: sha512-2ZTgtl0nJsO0KQCjEpxcIr5D+Yv90plTitZt9JBfQvVJDS5seMl3FOvsh3+9CoYWXf/1l5OaZzzF6nDm4cagaQ==,
-      }
-    dev: false
-    optional: true
 
   /natural-compare-lite/1.4.0:
     resolution:
@@ -3177,14 +2944,6 @@ packages:
       - utf-8-validate
     dev: false
 
-  /steno/3.0.0:
-    resolution:
-      {
-        integrity: sha512-uZtn7Ht9yXLiYgOsmo8btj4+f7VxyYheMt8g6F1ANjyqByQXEE2Gygjgenp3otHH1TlHsS4JAaRGv5wJ1wvMNw==,
-      }
-    engines: { node: '>=14.16' }
-    dev: false
-
   /strict-event-emitter-types/2.0.0:
     resolution:
       {
@@ -3393,15 +3152,6 @@ packages:
     engines: { node: '>=10' }
     dev: true
 
-  /typedoc-plugin-cname/1.0.1:
-    resolution:
-      {
-        integrity: sha512-f97SS5RzDCVBa7Frg1VketIMAkEl3OTvBs9wM8lLEkJVWCIG2yXnszglA82on39gFwQ1tyq8tiuxRgb4569GpA==,
-      }
-    peerDependencies:
-      typedoc: ^0.20.27
-    dev: false
-
   /typedoc/0.22.18_typescript@4.9.3:
     resolution:
       {
@@ -3434,19 +3184,6 @@ packages:
         integrity: sha512-WxONCrssBM8TSPRqN5EmsjVrsv4A8X12J4ArBiiayv3DyyG3ZlIg6yysuuSYdZsVz3TKcTg2fd//Ujd4CHV1iA==,
       }
     dev: true
-
-  /unix-dgram/2.0.6:
-    resolution:
-      {
-        integrity: sha512-AURroAsb73BZ6CdAyMrTk/hYKNj3DuYYEuOaB8bYMOHGKupRNScw90Q5C71tWJc3uE7dIeXRyuwN0xLLq3vDTg==,
-      }
-    engines: { node: '>=0.10.48' }
-    requiresBuild: true
-    dependencies:
-      bindings: 1.5.0
-      nan: 2.17.0
-    dev: false
-    optional: true
 
   /uri-js/4.4.1:
     resolution:
@@ -3515,13 +3252,6 @@ packages:
     resolution:
       {
         integrity: sha512-2JAn3z8AR6rjK8Sm8orRC0h/bcl/DqL7tRPdGZ4I1CjdF+EaMLmYxBHyXuKL849eucPFhvBoxMsflfOb8kxaeQ==,
-      }
-    dev: false
-
-  /whatwg-fetch/3.6.2:
-    resolution:
-      {
-        integrity: sha512-bJlen0FcuU/0EMLrdbJ7zOnW6ITZLrZMIarMUVmdKtsGvZna8vxKYaexICWPfZ8qwf9fzNq+UEIZrnSaApt6RA==,
       }
     dev: false
 
