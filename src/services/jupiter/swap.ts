@@ -32,8 +32,8 @@ const fetchAndSignJupiterTransaction = async ({
 			signers: [surfWallet],
 			instructions: [
 				...buildPriorityFeeIxs({
-					units: 500000,
-					unitPrice: 30000,
+					units: 700000,
+					unitPrice: 15000,
 				}),
 				swapIx,
 			],
