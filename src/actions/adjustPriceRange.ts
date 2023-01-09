@@ -68,6 +68,7 @@ export const adjustPriceRange = async ({
 		...boundaries,
 	})
 
+	const priorityFeesIxs: TransactionInstruction[] = []
 	const swapInstructions: TransactionInstruction[] = []
 	const ALTAccounts: AddressLookupTableAccount[] = []
 
@@ -83,9 +84,9 @@ export const adjustPriceRange = async ({
 			amountRaw: Math.abs(tokenADiff),
 			onlyDirectRoutes: true,
 		})
-		swapInstructions.unshift(
+		priorityFeesIxs.push(
 			...buildPriorityFeeIxs({
-				units: 600000,
+				units: 550000,
 				unitPrice: 50000,
 			}),
 		)
@@ -94,7 +95,7 @@ export const adjustPriceRange = async ({
 	} else if (tokenADiff > 0) {
 		// need to swap USDC to SOL
 		const ix = await buildSwapIx({ outAmount: tokenADiff, aToB: false })
-		swapInstructions.unshift(
+		priorityFeesIxs.push(
 			...buildPriorityFeeIxs({
 				units: 350000,
 				unitPrice: 80000,
@@ -108,6 +109,7 @@ export const adjustPriceRange = async ({
 		{
 			signers: [surfWallet, ...additionalSigners],
 			instructions: [
+				...priorityFeesIxs,
 				...closeWhirlpoolPositionIxs,
 				...swapInstructions,
 				...openWhirlpoolPositionIxs,

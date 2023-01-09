@@ -4,10 +4,10 @@ import { z } from 'zod'
 import { ANALYTICS } from '../../config/index.js'
 
 const tokenBalancesSchema = z.object({
-	whirlpool: z.number().min(0),
+	whirlpool: z.number(),
 	drift: z.number(),
-	wallet: z.number().min(0),
-	rewardsAndFees: z.number().min(0),
+	wallet: z.number(),
+	rewardsAndFees: z.number(),
 })
 
 const snapshotSchema = z.object({
@@ -17,10 +17,10 @@ const snapshotSchema = z.object({
 		tokenB: tokenBalancesSchema,
 	}),
 	aggregatedBalances: z.object({
-		tokenA: z.number().min(0),
-		tokenB: z.number().min(0),
+		tokenA: z.number(),
+		tokenB: z.number(),
 	}),
-	totalInUsdc: z.number().min(0),
+	totalInUsdc: z.number(),
 	timestamp: z.number().gt(0),
 })
 
