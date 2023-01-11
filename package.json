@@ -8,15 +8,15 @@
 	"scripts": {
 		"build": "rm -rf dist && tsc",
 		"build:w": "rm -rf dist && tsc -w",
-		"start": "node dist/entrypoints/bot.js",
-		"stop": "node dist/entrypoints/withdraw.js",
-		"analytics": "node dist/entrypoints/analytics.js",
+		"dev:start": "node dist/entrypoints/bot.js",
+		"dev:analytics": "node dist/entrypoints/analytics.js",
+		"withdraw": "node dist/entrypoints/withdraw.js",
 		"format": "prettier . --write",
-		"pm2:bot": "pm2 start pm2/bot.config.cjs",
-		"pm2:bot:stop": "pm2 stop pm2/bot.config.cjs",
-		"pm2:analytics": "pm2 start pm2/analytics.config.cjs",
-		"pm2:analytics:stop": "pm2 stop pm2/analytics.config.cjs",
-		"pm2:stop-all": "pm2 stop pm2/bot.config.cjs && pm2 stop pm2/analytics.config.cjs"
+		"bot:start": "pm2 delete pm2/bot.config.cjs && pm2 start pm2/bot.config.cjs && echo \"Showing program logs, Ctrl + C to stop\" && tail -n 20 -f logfiles/bot/out.log",
+		"bot:stop": "pm2 stop pm2/bot.config.cjs",
+		"analytics:start": "pm2 start pm2/analytics.config.cjs",
+		"analytics:stop": "pm2 stop pm2/analytics.config.cjs",
+		"stop-all": "pm2 stop pm2/bot.config.cjs pm2/analytics.config.cjs"
 	},
 	"devDependencies": {
 		"@types/bn.js": "^5.1.1",

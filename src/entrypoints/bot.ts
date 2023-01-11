@@ -5,7 +5,7 @@ import { ComputeBudgetProgram } from '@solana/web3.js'
 import { adjustDriftPosition } from '../actions/adjustDriftPosition.js'
 import { adjustPriceRange } from '../actions/adjustPriceRange.js'
 import { openHedgedPosition } from '../actions/openHedgedPosition.js'
-import { USDC_POSITION_SIZE } from '../config/index.js'
+import { DB_DATA, USDC_POSITION_SIZE } from '../config/index.js'
 import { userWallet, connection, surfWallet } from '../global.js'
 import { buildDriftInitializeUserIx } from '../services/drift/instructions/initializeUser.js'
 import { fetchAndUpdateWhirlpoolData } from '../services/orca/getWhirlpoolData.js'
@@ -15,81 +15,101 @@ import {
 	getBoundariesFromTickIndexes,
 	getAllowedPriceMoveFromBoundaries,
 } from '../services/orca/helpers/priceHelpers.js'
-import { setState, state } from '../state.js'
+import { loadState, setState, state } from '../state.js'
 import { forceSendTx } from '../utils/forceSendTx.js'
 import { buildCreateATAccountsIxs } from '../services/wallet/createATAccounts.js'
 import { buildDepositToSurfWalletIxs } from '../services/wallet/transferTokens.js'
 
 const whirlpoolData = await fetchAndUpdateWhirlpoolData()
 
-/* ---- SETUP ---- */
-await (async () => {
-	// Initialize all ATAs, transfer tokens to surf wallet
-	const initializeATAccountsIxs = await buildCreateATAccountsIxs(whirlpoolData.value.rewardInfos)
-	const transferTokensIxs = buildDepositToSurfWalletIxs()
-	const setupDriftIxs = await buildDriftInitializeUserIx()
+let resume = false
 
-	const instructions = [
-		ComputeBudgetProgram.setComputeUnitLimit({ units: 150000 }),
-		...initializeATAccountsIxs,
-		...transferTokensIxs,
-	]
-	const signers = [userWallet]
-
-	if (setupDriftIxs.length) {
-		instructions.push(...setupDriftIxs)
-		signers.push(surfWallet)
-	}
-
-	console.log('Creating Surf wallet, associated accounts, transferring tokens')
-	await forceSendTx(() =>
-		buildAndSignTxFromInstructions(
-			{
-				signers,
-				instructions,
-			},
-			connection,
-		),
+await loadState()
+if (Object.keys(state).length < 4) {
+	resume = false
+} else {
+	resume = true
+	console.log(
+		'▶ State loaded. Looks like position is already opened.\n',
+		'Bot will try to continue with the opened position, adjust price range and hedge if needed.\n',
 	)
-})()
+	console.log(
+		`🚨🚨 If you wish to not resume from previous position, press \`Ctrl (Command) + C\` or \`pm2 stop surf-farming\` and delete the state file in: \n	${DB_DATA}.\n`,
+		'Waiting 10 seconds...',
+	)
+	await setTimeout(10000)
+}
 
-/* ---- INIT ----
+if (!resume) {
+	/* ---- SETUP ---- */
+	await (async () => {
+		// Initialize all ATAs, transfer tokens to surf wallet
+		const initializeATAccountsIxs = await buildCreateATAccountsIxs(whirlpoolData.value.rewardInfos)
+		const transferTokensIxs = buildDepositToSurfWalletIxs()
+		const setupDriftIxs = await buildDriftInitializeUserIx()
+
+		const instructions = [
+			ComputeBudgetProgram.setComputeUnitLimit({ units: 150000 }),
+			...initializeATAccountsIxs,
+			...transferTokensIxs,
+		]
+		const signers = [userWallet]
+
+		if (setupDriftIxs.length) {
+			instructions.push(...setupDriftIxs)
+			signers.push(surfWallet)
+		}
+
+		console.log('Creating Surf wallet, associated accounts, transferring tokens')
+		await forceSendTx(() =>
+			buildAndSignTxFromInstructions(
+				{
+					signers,
+					instructions,
+				},
+				connection,
+			),
+		)
+	})()
+
+	/* ---- INIT ----
 	- Open hedged position
 		- deposit to whirlpool
 		- hedge on drift
 */
-await (async () => {
-	console.log('Opening position')
-	const { price, upperBoundaryPrice, lowerBoundaryPrice } = getPriceWithBoundariesFromSqrtPrice(
-		whirlpoolData.value.sqrtPrice,
-	)
-	const { driftPosition, whirlpoolPosition } = await openHedgedPosition({
-		usdcAmountRaw: USDC_POSITION_SIZE * 10 ** 6,
-		whirlpoolData: whirlpoolData.value,
-		upperBoundaryPrice,
-		lowerBoundaryPrice,
-	})
+	await (async () => {
+		console.log('Opening position')
+		const { price, upperBoundaryPrice, lowerBoundaryPrice } = getPriceWithBoundariesFromSqrtPrice(
+			whirlpoolData.value.sqrtPrice,
+		)
+		const { driftPosition, whirlpoolPosition } = await openHedgedPosition({
+			usdcAmountRaw: USDC_POSITION_SIZE * 10 ** 6,
+			whirlpoolData: whirlpoolData.value,
+			upperBoundaryPrice,
+			lowerBoundaryPrice,
+		})
 
-	const boundaries = getBoundariesFromTickIndexes({
-		tickLowerIndex: whirlpoolPosition.tickLowerIndex,
-		tickUpperIndex: whirlpoolPosition.tickUpperIndex,
-	})
-	const allowedPriceMove = getAllowedPriceMoveFromBoundaries(boundaries)
+		const boundaries = getBoundariesFromTickIndexes({
+			tickLowerIndex: whirlpoolPosition.tickLowerIndex,
+			tickUpperIndex: whirlpoolPosition.tickUpperIndex,
+		})
+		const allowedPriceMove = getAllowedPriceMoveFromBoundaries(boundaries)
 
-	await setState({
-		priceMoveWithoutDriftAdjustment: allowedPriceMove,
-		lastAdjustmentPrice: price,
-		driftPosition,
-		whirlpoolPosition,
-	})
+		await setState({
+			priceMoveWithoutDriftAdjustment: allowedPriceMove,
+			lastAdjustmentPrice: price,
+			driftPosition,
+			whirlpoolPosition,
+		})
 
-	console.log(
-		'Hedged position opened\n',
-		`Current pool price: ${price}\n`,
-		`Upper boundary: ${upperBoundaryPrice.toFixed(6)}\n`,
-		`Lower boundary: ${lowerBoundaryPrice.toFixed(6)}\n`,
-	)
-})()
+		console.log(
+			'Hedged position opened\n',
+			`Current pool price: ${price}\n`,
+			`Upper boundary: ${upperBoundaryPrice.toFixed(6)}\n`,
+			`Lower boundary: ${lowerBoundaryPrice.toFixed(6)}\n`,
+		)
+	})()
+}
 
 /*
   HEDGE Adjusting

@@ -104,7 +104,8 @@ export const openHedgedPosition = async ({
 			depositLiquidityAndBorrowRes.status === 'BLOCK_HEIGHT_EXCEEDED' ||
 			(depositLiquidityAndBorrowRes.error?.programId?.equals(ORCA_WHIRLPOOL_PROGRAM_ID) &&
 				(depositLiquidityAndBorrowRes.error.error === 0x1781 ||
-					depositLiquidityAndBorrowRes.error.error === 0x1))
+					depositLiquidityAndBorrowRes.error.error === 0x1 ||
+					depositLiquidityAndBorrowRes.error.error === 0x1787))
 		) {
 			return openHedgedPosition({
 				usdcAmountRaw,
