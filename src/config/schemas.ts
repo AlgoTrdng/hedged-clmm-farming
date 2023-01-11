@@ -17,4 +17,5 @@ export const configSchema = z.object({
 	upperBoundaryPct: z.number().min(0),
 	lowerBoundaryPct: z.number().min(0),
 	usdcPositionSize: z.number().gt(0),
+	priorityFee: z.number().gt(0),
 })

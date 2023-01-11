@@ -11,4 +11,5 @@ export const {
 	upperBoundaryPct: UPPER_BOUNDARY_PCT,
 	lowerBoundaryPct: LOWER_BOUNDARY_PCT,
 	usdcPositionSize: USDC_POSITION_SIZE,
+	priorityFee: PRIORITY_FEE,
 } = config

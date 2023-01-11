@@ -87,7 +87,6 @@ export const adjustPriceRange = async ({
 		priorityFeesIxs.push(
 			...buildPriorityFeeIxs({
 				units: 550000,
-				unitPrice: 50000,
 			}),
 		)
 		swapInstructions.push(swapIx)
@@ -98,7 +97,6 @@ export const adjustPriceRange = async ({
 		priorityFeesIxs.push(
 			...buildPriorityFeeIxs({
 				units: 350000,
-				unitPrice: 80000,
 			}),
 		)
 		swapInstructions.push(ix)

@@ -73,7 +73,6 @@ export const openHedgedPosition = async ({
 			instructions: [
 				...buildPriorityFeeIxs({
 					units: 450000,
-					unitPrice: 15000,
 				}),
 				prepareDepositAmountIx,
 				...openWhirlpoolPositionIxs,

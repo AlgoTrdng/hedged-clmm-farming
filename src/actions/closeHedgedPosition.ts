@@ -72,7 +72,6 @@ export const closeHedgedPosition = async (
 			instructions: [
 				...buildPriorityFeeIxs({
 					units: 300000,
-					unitPrice: 80000,
 				}),
 				...instructions,
 				repayIx,

@@ -66,7 +66,6 @@ export const adjustDriftPosition = async ({
 		instructions.push(
 			...buildPriorityFeeIxs({
 				units: 650000,
-				unitPrice: 20000,
 			}),
 			borrowIx,
 			swapIx,
@@ -86,7 +85,6 @@ export const adjustDriftPosition = async ({
 		instructions.push(
 			...buildPriorityFeeIxs({
 				units: 180000,
-				unitPrice: 50000,
 			}),
 			ix,
 			repayIx,

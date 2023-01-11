@@ -33,7 +33,6 @@ const fetchAndSignJupiterTransaction = async ({
 			instructions: [
 				...buildPriorityFeeIxs({
 					units: 1200000,
-					unitPrice: 5000,
 				}),
 				swapIx,
 			],
