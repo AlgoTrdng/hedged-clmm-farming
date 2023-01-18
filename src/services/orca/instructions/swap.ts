@@ -96,12 +96,14 @@ const fetchTickArrays = async (whirlpoolsData: Map<string, ParsedWhirlpool>, aTo
 
 type BestSwapParams = SwapInput &
 	Pick<ParsedWhirlpool, 'tokenVaultA' | 'tokenVaultB' | 'oracle'> & {
-		inAmount: number
+		specifiedAmount: number
+		otherAmount: number
 		whirlpool: PublicKey
 	}
 
 type BuildSwapIxParams = {
-	outAmount: number
+	amount: number
+	mode: 'ExactIn' | 'ExactOut'
 	aToB?: boolean
 }
 
@@ -109,11 +111,12 @@ type BuildSwapIxParams = {
  * Builds USDC to SOL swap instructions with the best possible quote from SOL/USDC whirlpools
  */
 export const buildSwapIx = async ({
-	outAmount,
+	amount,
+	mode,
 	aToB = false,
 }: BuildSwapIxParams): Promise<TransactionInstruction> => {
 	console.log('Building orca swap ix')
-	const amountSpecifiedIsInput = false
+	const amountSpecifiedIsInput = mode === 'ExactIn'
 
 	const whirlpoolsData = await fetchWhirlpoolsData()
 	const whirlpoolsTickArraysDataMap = await fetchTickArrays(whirlpoolsData, aToB)
@@ -126,13 +129,13 @@ export const buildSwapIx = async ({
 		if (!whirlpoolData || !tickArrays || tickArrays.length < 3) {
 			return
 		}
-		const amount = new BN(outAmount)
+		const specifiedAmount = new BN(amount)
 		const sqrtPriceLimit = SwapUtils.getDefaultSqrtPriceLimit(aToB)
 		const otherAmountThreshold = SwapUtils.getDefaultOtherAmountThreshold(amountSpecifiedIsInput)
 		try {
 			const quote = swapQuoteWithParams(
 				{
-					tokenAmount: amount,
+					tokenAmount: specifiedAmount,
 					otherAmountThreshold,
 					sqrtPriceLimit,
 					tickArrays,
@@ -142,15 +145,20 @@ export const buildSwapIx = async ({
 				},
 				SLIPPAGE_TOLERANCE,
 			)
-			const inAmount = quote.estimatedAmountIn.toNumber()
-			if (!bestSwapParams || bestSwapParams.inAmount > inAmount) {
+			const otherAmount = mode === 'ExactOut' ? quote.estimatedAmountIn.toNumber() : quote.estimatedAmountOut.toNumber()
+			if (
+				!bestSwapParams ||
+				(mode === 'ExactIn' && bestSwapParams.otherAmount < otherAmount) ||
+				(mode === 'ExactOut' && bestSwapParams.otherAmount > otherAmount)
+			) {
 				bestSwapParams = {
-					inAmount,
-					amount,
 					aToB,
 					amountSpecifiedIsInput,
 					sqrtPriceLimit,
 					otherAmountThreshold,
+					otherAmount,
+					specifiedAmount: amount,
+					amount: specifiedAmount,
 					whirlpool: pk,
 					tokenVaultA: whirlpoolData.tokenVaultA,
 					tokenVaultB: whirlpoolData.tokenVaultB,
@@ -167,7 +175,7 @@ export const buildSwapIx = async ({
 
 	if (!bestSwapParams) {
 		await setTimeout(500)
-		return buildSwapIx({ outAmount })
+		return buildSwapIx({ amount: amount, mode, aToB })
 	}
 
 	const { instructions } = WhirlpoolIx.swapIx(whirlpoolProgram, {

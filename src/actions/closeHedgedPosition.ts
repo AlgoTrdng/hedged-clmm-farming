@@ -43,7 +43,8 @@ export const closeHedgedPosition = async (
 	const tokenADiff = withdrawAmounts.tokenA - tokenABorrowedAmount
 	if (tokenADiff - 100_000 < 0) {
 		const swapIx = await buildSwapIx({
-			outAmount: Math.abs(tokenADiff) + 100_000,
+			amount: Math.abs(tokenADiff) + 100_000,
+			mode: 'ExactOut',
 			aToB: false,
 		})
 		instructions.push(swapIx)

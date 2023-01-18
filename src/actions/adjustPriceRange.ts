@@ -1,5 +1,5 @@
 import { decreaseLiquidityQuoteByLiquidityWithParams, WhirlpoolData } from '@orca-so/whirlpools-sdk'
-import { AddressLookupTableAccount, TransactionInstruction } from '@solana/web3.js'
+import { TransactionInstruction } from '@solana/web3.js'
 import { buildAndSignTxFromInstructions, sendTransaction } from 'solana-tx-utils'
 import { setTimeout } from 'node:timers/promises'
 
@@ -16,7 +16,6 @@ import {
 import { loadALTAccount } from '../utils/loadALTAccount.js'
 import { WhirlpoolPosition } from '../state.js'
 import { buildSwapIx } from '../services/orca/instructions/swap.js'
-import { fetchJupiterIx } from '../services/jupiter/transaction.js'
 import { buildPriorityFeeIxs } from '../instructions/priorityFee.js'
 
 type AdjustPriceRangeParams = {
@@ -40,12 +39,17 @@ export const adjustPriceRange = async ({
 		tickUpperIndex: whirlpoolPosition.tickUpperIndex,
 	})
 
-	const { outAmount: withdrawnTokenAAsTokenBAmount } = await fetchBestRoute({
-		inputMint: tokenA.mint,
-		outputMint: tokenB.mint,
-		amountRaw: decreaseLiquidityQuote.tokenEstA.toNumber(),
-		swapMode: 'ExactIn',
-	})
+	const withdrawTokenAAmount = decreaseLiquidityQuote.tokenEstA.toNumber()
+	let withdrawnTokenAAsTokenBAmount = 0
+	if (withdrawTokenAAmount > 100) {
+		const { outAmount } = await fetchBestRoute({
+			inputMint: tokenA.mint,
+			outputMint: tokenB.mint,
+			amountRaw: decreaseLiquidityQuote.tokenEstA.toNumber(),
+			swapMode: 'ExactIn',
+		})
+		withdrawnTokenAAsTokenBAmount = Number(outAmount)
+	}
 
 	const { instructions: closeWhirlpoolPositionIxs, withdrawAmounts } =
 		buildCloseWhirlpoolPositionIxs({
@@ -54,7 +58,7 @@ export const adjustPriceRange = async ({
 			decreaseLiquidityQuote,
 		})
 
-	const totalTokenBAmount = withdrawAmounts.tokenB + Number(withdrawnTokenAAsTokenBAmount)
+	const totalTokenBAmount = withdrawAmounts.tokenB + withdrawnTokenAAsTokenBAmount
 	const boundaries = getBoundariesPricesFromPrice(currentPrice)
 
 	const {
@@ -70,30 +74,21 @@ export const adjustPriceRange = async ({
 
 	const priorityFeesIxs: TransactionInstruction[] = []
 	const swapInstructions: TransactionInstruction[] = []
-	const ALTAccounts: AddressLookupTableAccount[] = []
 
 	const tokenADiff = depositAmounts.tokenA - withdrawAmounts.tokenA
 
 	if (tokenADiff < 0) {
 		// need to swap SOL to USDC
-		const { instruction: swapIx, ALTAccounts: swapALTAccounts } = await fetchJupiterIx({
-			inputMint: tokenA.mint,
-			outputMint: tokenB.mint,
-			unwrapSol: false,
-			swapMode: 'ExactIn',
-			amountRaw: Math.abs(tokenADiff),
-			onlyDirectRoutes: true,
-		})
+		const swapIx = await buildSwapIx({ amount: Math.abs(tokenADiff), mode: 'ExactIn', aToB: true })
 		priorityFeesIxs.push(
 			...buildPriorityFeeIxs({
-				units: 550000,
+				units: 1400000,
 			}),
 		)
 		swapInstructions.push(swapIx)
-		ALTAccounts.push(...swapALTAccounts)
 	} else if (tokenADiff > 0) {
 		// need to swap USDC to SOL
-		const ix = await buildSwapIx({ outAmount: tokenADiff, aToB: false })
+		const ix = await buildSwapIx({ amount: tokenADiff, mode: 'ExactOut', aToB: false })
 		priorityFeesIxs.push(
 			...buildPriorityFeeIxs({
 				units: 350000,
@@ -112,7 +107,7 @@ export const adjustPriceRange = async ({
 				...swapInstructions,
 				...openWhirlpoolPositionIxs,
 			],
-			addressLookupTables: [ALTAccount, ...ALTAccounts],
+			addressLookupTables: [ALTAccount],
 		},
 		connection,
 	)

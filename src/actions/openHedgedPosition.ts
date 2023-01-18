@@ -50,7 +50,7 @@ export const openHedgedPosition = async ({
 	})
 
 	// Swap USDC to SOL
-	const prepareDepositAmountIx = await buildSwapIx({ outAmount: depositAmounts.tokenA })
+	const prepareDepositAmountIx = await buildSwapIx({ amount: depositAmounts.tokenA, mode: 'ExactOut' })
 
 	// Deposit to DRIFT
 	const depositUsdcToDrift = buildDriftDepositIx({

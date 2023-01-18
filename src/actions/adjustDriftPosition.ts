@@ -65,7 +65,7 @@ export const adjustDriftPosition = async ({
 		})
 		instructions.push(
 			...buildPriorityFeeIxs({
-				units: 650000,
+				units: 1_000_000,
 			}),
 			borrowIx,
 			swapIx,
@@ -76,7 +76,7 @@ export const adjustDriftPosition = async ({
 		const amount = Math.abs(tokenADiff)
 		adjustedDriftPosition.borrowAmount -= amount
 
-		const ix = await buildSwapIx({ outAmount: amount, aToB: false })
+		const ix = await buildSwapIx({ amount, mode: 'ExactOut', aToB: false })
 		const repayIx = buildDriftDepositIx({
 			amountRaw: amount,
 			token: tokenA,
