@@ -43,7 +43,7 @@
 		"decimal.js": "^10.4.2",
 		"dotenv": "^16.0.3",
 		"node-fetch": "^3.3.0",
-		"solana-tx-utils": "^0.0.9",
+		"solana-tx-utils": "^0.1.1",
 		"zod": "^3.19.1"
 	}
 }

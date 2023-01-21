@@ -145,7 +145,10 @@ export const buildSwapIx = async ({
 				},
 				SLIPPAGE_TOLERANCE,
 			)
-			const otherAmount = mode === 'ExactOut' ? quote.estimatedAmountIn.toNumber() : quote.estimatedAmountOut.toNumber()
+			const otherAmount =
+				mode === 'ExactOut'
+					? quote.estimatedAmountIn.toNumber()
+					: quote.estimatedAmountOut.toNumber()
 			if (
 				!bestSwapParams ||
 				(mode === 'ExactIn' && bestSwapParams.otherAmount < otherAmount) ||

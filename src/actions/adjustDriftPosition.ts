@@ -1,6 +1,6 @@
 import { PriceMath, PoolUtil } from '@orca-so/whirlpools-sdk'
 import { AddressLookupTableAccount, TransactionInstruction } from '@solana/web3.js'
-import { buildAndSignTxFromInstructions, sendTransaction } from 'solana-tx-utils'
+import { buildAndSignTxFromInstructions } from 'solana-tx-utils'
 import { setTimeout } from 'node:timers/promises'
 import BN from 'bn.js'
 
@@ -13,6 +13,7 @@ import { loadALTAccount } from '../utils/loadALTAccount.js'
 import { DriftPosition, WhirlpoolPosition } from '../state.js'
 import { buildSwapIx } from '../services/orca/instructions/swap.js'
 import { buildPriorityFeeIxs } from '../instructions/priorityFee.js'
+import { sendTransactionWrapper } from '../utils/sendTransactionWrapper.js'
 
 type AdjustHedgePositionParams = {
 	driftPosition: DriftPosition
@@ -106,13 +107,7 @@ export const adjustDriftPosition = async ({
 	)
 
 	while (true) {
-		const res = await sendTransaction(
-			{
-				...txData,
-				connection,
-			},
-			{ log: true },
-		)
+		const res = await sendTransactionWrapper(txData)
 		switch (res.status) {
 			case 'SUCCESS': {
 				return adjustedDriftPosition

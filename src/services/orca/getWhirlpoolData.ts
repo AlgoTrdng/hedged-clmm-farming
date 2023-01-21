@@ -14,27 +14,38 @@ export const fetchWhirlpoolData = async (): Promise<WhirlpoolData> => {
 	return whirlpoolAccountData
 }
 
-export const fetchAndUpdateWhirlpoolData = async () => {
-	console.log('Connecting to whirlpool')
-	const refreshTimeout = 1000 * 60 * 15
+export const initWhirlpoolState = async (updateMethod: 'polling' | 'websocket') => {
 	const whirlpoolData = {
 		value: await fetchWhirlpoolData(),
 	}
 
-	const handleAccountChange = (ai: AccountInfo<Buffer>) => {
-		const data = ParsableWhirlpool.parse(ai.data)
-		if (!data) {
+	const update = async () => {
+		if (updateMethod === 'websocket') {
 			return
 		}
-		whirlpoolData.value = data
+		whirlpoolData.value = await fetchWhirlpoolData()
 	}
 
-	let subId = connection.onAccountChange(WHIRLPOOL_ADDRESS, handleAccountChange)
-	setInterval(() => {
-		console.log('Refreshing connection')
-		connection.removeAccountChangeListener(subId)
-		subId = connection.onAccountChange(WHIRLPOOL_ADDRESS, handleAccountChange)
-	}, refreshTimeout)
+	if (updateMethod === 'websocket') {
+		const handleAccountChange = (ai: AccountInfo<Buffer>) => {
+			const data = ParsableWhirlpool.parse(ai.data)
+			if (!data) {
+				return
+			}
+			whirlpoolData.value = data
+		}
 
-	return whirlpoolData
+		const refreshTimeout = 1000 * 60 * 15
+		let subId = connection.onAccountChange(WHIRLPOOL_ADDRESS, handleAccountChange)
+		setInterval(() => {
+			console.log('Refreshing connection')
+			connection.removeAccountChangeListener(subId)
+			subId = connection.onAccountChange(WHIRLPOOL_ADDRESS, handleAccountChange)
+		}, refreshTimeout)
+	}
+
+	return {
+		whirlpoolData,
+		update,
+	}
 }

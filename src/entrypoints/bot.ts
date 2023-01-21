@@ -6,9 +6,9 @@ import { adjustDriftPosition } from '../actions/adjustDriftPosition.js'
 import { adjustPriceRange } from '../actions/adjustPriceRange.js'
 import { openHedgedPosition } from '../actions/openHedgedPosition.js'
 import { DB_DATA, USDC_POSITION_SIZE } from '../config/index.js'
-import { userWallet, connection, surfWallet } from '../global.js'
+import { userWallet, connection, surfWallet, updateMethod } from '../global.js'
 import { buildDriftInitializeUserIx } from '../services/drift/instructions/initializeUser.js'
-import { fetchAndUpdateWhirlpoolData } from '../services/orca/getWhirlpoolData.js'
+import { initWhirlpoolState } from '../services/orca/getWhirlpoolData.js'
 import { isPriceInRange } from '../services/orca/helpers/isPriceInRange.js'
 import {
 	getPriceWithBoundariesFromSqrtPrice,
@@ -19,8 +19,6 @@ import { loadState, setState, state } from '../state.js'
 import { forceSendTx } from '../utils/forceSendTx.js'
 import { buildCreateATAccountsIxs } from '../services/wallet/createATAccounts.js'
 import { buildDepositToSurfWalletIxs } from '../services/wallet/transferTokens.js'
-
-const whirlpoolData = await fetchAndUpdateWhirlpoolData()
 
 let resume = false
 
@@ -39,6 +37,8 @@ if (Object.keys(state).length < 4) {
 	)
 	await setTimeout(10000)
 }
+
+const { whirlpoolData, update: updateWhirlpoolData } = await initWhirlpoolState(updateMethod)
 
 if (!resume) {
 	/* ---- SETUP ---- */
@@ -73,11 +73,12 @@ if (!resume) {
 	})()
 
 	/* ---- INIT ----
-	- Open hedged position
-		- deposit to whirlpool
-		- hedge on drift
-*/
+		- Open hedged position
+			- deposit to whirlpool
+			- hedge on drift
+	*/
 	await (async () => {
+		await updateWhirlpoolData()
 		console.log('Opening position')
 		const { price, upperBoundaryPrice, lowerBoundaryPrice } = getPriceWithBoundariesFromSqrtPrice(
 			whirlpoolData.value.sqrtPrice,
@@ -131,6 +132,7 @@ const UPDATE_TIMEOUT = 60_000
 // TODO: collect fees and rewards
 while (true) {
 	await setTimeout(UPDATE_TIMEOUT)
+	await updateWhirlpoolData()
 
 	const {
 		price: currentPoolPrice,

@@ -1,12 +1,13 @@
 import { WhirlpoolData } from '@orca-so/whirlpools-sdk'
 import { getAssociatedTokenAddressSync, createTransferInstruction } from '@solana/spl-token'
 import { SystemProgram } from '@solana/web3.js'
-import { buildAndSignTxFromInstructions, sendTransaction } from 'solana-tx-utils'
+import { buildAndSignTxFromInstructions } from 'solana-tx-utils'
 import { setTimeout } from 'node:timers/promises'
 
 import { USDC_MINT } from '../constants.js'
 import { tokenB, surfWallet, userWallet, connection } from '../global.js'
 import { buildCloseAccountsIxs } from '../instructions/closeAccounts.js'
+import { sendTransactionWrapper } from '../utils/sendTransactionWrapper.js'
 
 const userTokenBATAccount = getAssociatedTokenAddressSync(USDC_MINT, userWallet.publicKey)
 
@@ -61,13 +62,7 @@ export const transferTokensAndCloseAccounts = async ({
 		connection,
 	)
 	while (true) {
-		const res = await sendTransaction(
-			{
-				...txData,
-				connection,
-			},
-			{ log: true },
-		)
+		const res = await sendTransactionWrapper(txData)
 		if (res.status === 'SUCCESS') {
 			return
 		}

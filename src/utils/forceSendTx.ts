@@ -1,18 +1,12 @@
-import { BuiltTransactionData, sendTransaction } from 'solana-tx-utils'
+import { BuiltTransactionData } from 'solana-tx-utils'
 import { setTimeout } from 'node:timers/promises'
 
-import { connection } from '../global.js'
+import { sendTransactionWrapper } from './sendTransactionWrapper.js'
 
 export const forceSendTx = async (signedTxBuilder: () => Promise<BuiltTransactionData>) => {
 	let txData = await signedTxBuilder()
 	while (true) {
-		const res = await sendTransaction(
-			{
-				...txData,
-				connection,
-			},
-			{ log: true },
-		)
+		const res = await sendTransactionWrapper(txData)
 		switch (res.status) {
 			case 'SUCCESS': {
 				return res.data

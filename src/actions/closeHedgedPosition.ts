@@ -1,6 +1,6 @@
 import { decreaseLiquidityQuoteByLiquidityWithParams, WhirlpoolData } from '@orca-so/whirlpools-sdk'
 import { ConfirmedTransactionMeta } from '@solana/web3.js'
-import { buildAndSignTxFromInstructions, sendTransaction } from 'solana-tx-utils'
+import { buildAndSignTxFromInstructions } from 'solana-tx-utils'
 import { createCloseAccountInstruction } from '@solana/spl-token'
 import { setTimeout } from 'node:timers/promises'
 
@@ -15,6 +15,7 @@ import { buildSwapIx } from '../services/orca/instructions/swap.js'
 import { state } from '../state.js'
 import { loadALTAccount } from '../utils/loadALTAccount.js'
 import { buildPriorityFeeIxs } from '../instructions/priorityFee.js'
+import { sendTransactionWrapper } from '../utils/sendTransactionWrapper.js'
 
 export const closeHedgedPosition = async (
 	whirlpoolData?: WhirlpoolData,
@@ -85,13 +86,7 @@ export const closeHedgedPosition = async (
 	)
 
 	while (true) {
-		const res = await sendTransaction(
-			{
-				...txData,
-				connection,
-			},
-			{ log: true },
-		)
+		const res = await sendTransactionWrapper(txData)
 		if (res.status === 'SUCCESS') {
 			return res.data
 		}

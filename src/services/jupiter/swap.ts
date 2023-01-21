@@ -1,12 +1,9 @@
 import { setTimeout } from 'node:timers/promises'
-import {
-	sendTransaction,
-	BuiltTransactionData,
-	buildAndSignTxFromInstructions,
-} from 'solana-tx-utils'
+import { BuiltTransactionData, buildAndSignTxFromInstructions } from 'solana-tx-utils'
 
 import { connection, surfWallet } from '../../global.js'
 import { buildPriorityFeeIxs } from '../../instructions/priorityFee.js'
+import { sendTransactionWrapper } from '../../utils/sendTransactionWrapper.js'
 import { fetchJupiterIx } from './transaction.js'
 import { ExecuteJupiterSwapParams } from './types.js'
 
@@ -61,16 +58,10 @@ export const executeJupiterSwap = async ({
 			unwrapSol,
 			onlyDirectRoutes,
 		})
-	let tx = await _fetchTxs()
+	let txData = await _fetchTxs()
 
 	while (true) {
-		const res = await sendTransaction(
-			{
-				...tx,
-				connection,
-			},
-			{ log: true },
-		)
+		const res = await sendTransactionWrapper(txData)
 
 		if (res.status === 'SUCCESS') {
 			return
@@ -81,7 +72,8 @@ export const executeJupiterSwap = async ({
 			res.error?.error === 6000 ||
 			res.error?.error === 6001
 		) {
-			tx = await _fetchTxs()
+			txData = await _fetchTxs()
+			await setTimeout(500)
 			continue
 		}
 

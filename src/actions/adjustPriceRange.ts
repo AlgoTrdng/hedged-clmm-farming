@@ -1,6 +1,6 @@
 import { decreaseLiquidityQuoteByLiquidityWithParams, WhirlpoolData } from '@orca-so/whirlpools-sdk'
 import { TransactionInstruction } from '@solana/web3.js'
-import { buildAndSignTxFromInstructions, sendTransaction } from 'solana-tx-utils'
+import { buildAndSignTxFromInstructions } from 'solana-tx-utils'
 import { setTimeout } from 'node:timers/promises'
 
 import { SLIPPAGE_TOLERANCE } from '../constants.js'
@@ -17,6 +17,7 @@ import { loadALTAccount } from '../utils/loadALTAccount.js'
 import { WhirlpoolPosition } from '../state.js'
 import { buildSwapIx } from '../services/orca/instructions/swap.js'
 import { buildPriorityFeeIxs } from '../instructions/priorityFee.js'
+import { sendTransactionWrapper } from '../utils/sendTransactionWrapper.js'
 
 type AdjustPriceRangeParams = {
 	whirlpoolPosition: WhirlpoolPosition
@@ -113,13 +114,7 @@ export const adjustPriceRange = async ({
 	)
 
 	while (true) {
-		const res = await sendTransaction(
-			{
-				...txData,
-				connection,
-			},
-			{ log: true },
-		)
+		const res = await sendTransactionWrapper(txData)
 		switch (res.status) {
 			case 'SUCCESS': {
 				console.log(

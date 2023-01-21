@@ -42,3 +42,5 @@ export const collateralAmount = usdcPositionSizeRaw - orcaAmount
 
 export const upperBoundaryBps = UPPER_BOUNDARY_PCT / 100
 export const lowerBoundaryBps = LOWER_BOUNDARY_PCT / 100
+
+export const updateMethod = 'polling'

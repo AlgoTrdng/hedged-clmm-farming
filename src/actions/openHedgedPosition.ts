@@ -1,4 +1,4 @@
-import { sendTransaction, buildAndSignTxFromInstructions } from 'solana-tx-utils'
+import { buildAndSignTxFromInstructions } from 'solana-tx-utils'
 import { ORCA_WHIRLPOOL_PROGRAM_ID, WhirlpoolData } from '@orca-so/whirlpools-sdk'
 
 import { connection, tokenA, tokenB, surfWallet } from '../global.js'
@@ -11,6 +11,7 @@ import { DriftPosition, WhirlpoolPosition } from '../state.js'
 import { buildSwapIx } from '../services/orca/instructions/swap.js'
 import { fetchWhirlpoolData } from '../services/orca/getWhirlpoolData.js'
 import { buildPriorityFeeIxs } from '../instructions/priorityFee.js'
+import { sendTransactionWrapper } from '../utils/sendTransactionWrapper.js'
 
 type OpenHedgedPositionParams = {
 	usdcAmountRaw: number
@@ -50,7 +51,10 @@ export const openHedgedPosition = async ({
 	})
 
 	// Swap USDC to SOL
-	const prepareDepositAmountIx = await buildSwapIx({ amount: depositAmounts.tokenA, mode: 'ExactOut' })
+	const prepareDepositAmountIx = await buildSwapIx({
+		amount: depositAmounts.tokenA,
+		mode: 'ExactOut',
+	})
 
 	// Deposit to DRIFT
 	const depositUsdcToDrift = buildDriftDepositIx({
@@ -65,7 +69,7 @@ export const openHedgedPosition = async ({
 	})
 
 	const ALTAccount = await loadALTAccount()
-	const tx = await buildAndSignTxFromInstructions(
+	const txData = await buildAndSignTxFromInstructions(
 		{
 			payerKey: surfWallet.publicKey,
 			signers: [surfWallet, ...additionalSigners],
@@ -84,13 +88,7 @@ export const openHedgedPosition = async ({
 	)
 
 	while (true) {
-		const depositLiquidityAndBorrowRes = await sendTransaction(
-			{
-				...tx,
-				connection,
-			},
-			{ log: true },
-		)
+		const depositLiquidityAndBorrowRes = await sendTransactionWrapper(txData)
 		if (depositLiquidityAndBorrowRes.status === 'SUCCESS') {
 			console.log(
 				'Whirlpool position balances:\n',
