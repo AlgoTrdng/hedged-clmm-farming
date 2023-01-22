@@ -31,9 +31,8 @@ export const openHedgedPosition = async ({
 	lowerBoundaryPrice,
 	whirlpoolData,
 }: OpenHedgedPositionParams): Promise<HedgedPosition> => {
-	const safeInputAmountRaw = usdcAmountRaw - 500_000
-	const orcaAmount = Math.floor(safeInputAmountRaw * 0.5)
-	const collateralAmount = safeInputAmountRaw - orcaAmount
+	const orcaAmount = Math.floor(usdcAmountRaw * 0.5)
+	const collateralAmount = usdcAmountRaw - orcaAmount
 
 	const _whirlpoolData = whirlpoolData || (await fetchWhirlpoolData())
 

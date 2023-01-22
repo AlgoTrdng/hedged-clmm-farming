@@ -84,7 +84,7 @@ if (!resume) {
 			whirlpoolData.value.sqrtPrice,
 		)
 		const { driftPosition, whirlpoolPosition } = await openHedgedPosition({
-			usdcAmountRaw: USDC_POSITION_SIZE * 10 ** 6,
+			usdcAmountRaw: USDC_POSITION_SIZE * 10 ** 6 - 500_000,
 			whirlpoolData: whirlpoolData.value,
 			upperBoundaryPrice,
 			lowerBoundaryPrice,
