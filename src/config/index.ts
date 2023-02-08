@@ -10,6 +10,7 @@ export const {
 	whirlpoolAddress: WHIRLPOOL_ADDRESS,
 	upperBoundaryPct: UPPER_BOUNDARY_PCT,
 	lowerBoundaryPct: LOWER_BOUNDARY_PCT,
+	hedgeAdjustmentsPerRange: HEDGE_ADJUSTMENTS_PER_RANGE,
 	usdcPositionSize: USDC_POSITION_SIZE,
 	priorityFee: PRIORITY_FEE,
 } = config

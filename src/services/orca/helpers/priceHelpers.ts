@@ -1,5 +1,6 @@
 import { PositionData, PriceMath } from '@orca-so/whirlpools-sdk'
 import BN from 'bn.js'
+import { HEDGE_ADJUSTMENTS_PER_RANGE } from '../../../config/index.js'
 
 import { lowerBoundaryBps, tokenA, tokenB, upperBoundaryBps } from '../../../global.js'
 
@@ -52,6 +53,6 @@ export const getAllowedPriceMoveFromBoundaries = ({
 }: GetAllowedPriceMoveFromBoundariesParams) => {
 	const priceRange = upperBoundaryPrice - lowerBoundaryPrice
 	// 5% pice move in price range
-	const allowedMove = priceRange / 20
+	const allowedMove = priceRange / HEDGE_ADJUSTMENTS_PER_RANGE
 	return Number(allowedMove.toFixed(6))
 }

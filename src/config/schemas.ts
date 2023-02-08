@@ -16,6 +16,7 @@ export const configSchema = z.object({
 		.transform((addr) => new PublicKey(addr)),
 	upperBoundaryPct: z.number().min(0),
 	lowerBoundaryPct: z.number().min(0),
+	hedgeAdjustmentsPerRange: z.number().min(0),
 	usdcPositionSize: z.number().gt(0),
 	priorityFee: z.number().gt(0),
 })

@@ -29,7 +29,7 @@ export const buildCreateATAccountsIxs = async (whirlpoolRewards: WhirlpoolReward
 		connection.getMultipleAccountsInfo(accountsAddressesToInitialize),
 	)
 	ATAccountsInfo.forEach((ai, i) => {
-		if (!ai?.data) {
+		if (!ai?.data?.length) {
 			ixs.push(
 				createAssociatedTokenAccountInstruction(
 					userWallet.publicKey,
