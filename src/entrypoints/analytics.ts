@@ -104,7 +104,7 @@ while (true) {
 		state.whirlpoolPosition.PDAddress,
 		tickLowerArrayAddress,
 	]
-	if (tickLowerArrayAddress.equals(tickUpperArrayAddress)) {
+	if (!tickLowerArrayAddress.equals(tickUpperArrayAddress)) {
 		accountsToFetch.push(tickUpperArrayAddress)
 	}
 	const accountsInfos = await retryOnThrow(() =>
